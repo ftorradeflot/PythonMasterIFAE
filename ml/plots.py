@@ -5,6 +5,7 @@ from sklearn import tree
 import collections
 import seaborn as sns
 import numpy as np
+import pandas as pd
 
 
 def draw_tree(clf):
@@ -131,3 +132,32 @@ def plot_bars_and_confusion(truth, prediction, axes=None, vmin=None, vmax=None):
     )
     axes[1].set_ylabel('Actual')
     axes[1].set_xlabel('Predicted')
+
+    
+def plot_bins_perc(df, bin_var, perc_var, bins=None, nbins=10, ax=None, var_type='discrete'):
+
+    if var_type == 'discrete':
+        groups = df.groupby(bin_var)
+    elif var_type == 'continuous':
+        if bins is None:
+            bins = np.linspace(df[bin_var].min(), df[bin_var].max(), nbins + 1)
+        groups = df.groupby(pd.cut(df[bin_var], bins))
+
+    counts = groups[perc_var].count()
+    percs = (groups[perc_var].sum().fillna(0)/counts).fillna(0)
+    
+    if var_type == 'discrete':
+        points = range(len(counts))
+        width=0.5
+    elif var_type == 'continuous':
+        points = (bins[:-1] + bins[1:])/2.
+        width = (bins[1] - bins[0])*0.5
+        
+    ax.bar(points, counts, width=width)
+    ax.set_xlabel(bin_var)
+    if var_type == 'discrete':
+        ax.set_xticks(points)
+        ax.set_xticklabels(counts.index)
+    
+    twinax = ax.twinx()
+    twinax.plot(points, percs, '-r')
