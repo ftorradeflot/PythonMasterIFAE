@@ -150,5 +150,6 @@ def plot_contingency_table(y_test, y_predict):
 Pred|    N|{: 8}|{: 8}|{: 8}|
     |Total|{: 8}|{: 8}|{: 8}|'''.format(TP, FP, TP + FP, FN, TN, TN + FN, TP + FN, FP + TN, TP + FP + FN + TN))
 
-    print('accuracy={}\n'.format(float(TP + TN)/float(total)))
+    print('accuracy={}\nprecission={}\nrecall={}'.format(float(TP + TN)/float(total),
+                                                        TP/(TP + FP), TP/(TP + FN)))
 
