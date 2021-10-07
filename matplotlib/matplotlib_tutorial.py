@@ -531,6 +531,75 @@ im = plt.imshow(np.sin(x) + np.cos(y), cmap='gist_heat') #, clim=(-0.5, 0.5)) #,
 plt.colorbar();
 # -
 
+# ## Shape plots
+
+# +
+from matplotlib.patches import Circle, Ellipse, Rectangle, Polygon
+from matplotlib.collections import PatchCollection
+
+# Fixing random state for reproducibility
+np.random.seed(19680801)
+
+
+kwargs1 = {}
+kwargs2 = {'facecolor': 'None',
+          'edgecolor': 'tab:red',
+          'linewidth': 5}
+kwargs3 = {'hatch': '*',
+          'fc': 'None'}
+kwargs3 = {'fc': 'greenyellow',
+          'alpha': 0.5}
+
+fig, ax = plt.subplots(figsize=(20, 10))
+
+# Rectangles: all patches have the same style 
+patch_list = []
+hr = 30
+wr = -20
+patch_list.append(Rectangle((wr + 2, hr), 1, 1))
+patch_list.append(Rectangle((wr + 6, hr), 2, 0.5))
+patch_list.append(Rectangle((wr + 12, hr), 2, 4))
+p = PatchCollection(patch_list, **kwargs1)
+ax.add_collection(p)
+
+# Polygon: all patches have the same style
+patch_list = []
+hr = 23
+wr = -20
+xor = [wr + i for i in [2, 6, 12]]
+radius = [1, 2, 3]
+for ind, nside in enumerate([3, 5, 7]):
+    points = [(xor[ind] + radius[ind]*np.cos(2*np.pi*i/nside),
+               hr + radius[ind]*np.sin(2*np.pi*i/nside))
+               for i in range(nside)]
+    patch_list.append(Polygon(points))
+p = PatchCollection(patch_list, **kwargs2)
+ax.add_collection(p)
+
+
+# Ellipse: all patches have the same style 
+patch_list = []
+hel = 30
+we = 0
+patch_list.append(Ellipse((wc + 2, hel), 1, 2))
+patch_list.append(Ellipse([wc + 6, hel], 2, 0.5))
+patch_list.append(Ellipse([wc + 12, hel], 2, 4, 45))
+p = PatchCollection(patch_list, **kwargs3)
+ax.add_collection(p)
+
+# Circle: each patch is independent
+hc = 23
+wc = 0
+ax.add_patch(Circle([wc + 2, hc], 1, **kwargs1))
+ax.add_patch(Circle([wc + 6, hc], 2, **kwargs2))
+ax.add_patch(Circle([wc + 12, hc], 3, **kwargs3))
+
+ax.set_xlim(-20, 16)
+ax.set_ylim(18, 36)
+ax.set_aspect('equal')
+    
+# -
+
 # <a id=box_plot></a>
 # ## Box plots
 
