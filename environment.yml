@@ -1,15 +1,24 @@
-name: PythonBootcamp2020
+name: PythonBootcamp2021
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - python=3.8
-  - pip
-  - ipykernel
+  - ipywidgets=7.6.3
+  - jupyterlab=3.0.14
+  - jupyterlab_widgets=1.0.0
+  - jupytext=1.11.1
+  - nodejs=15.14.0
+  - numpy=1.20.1
+  - pip=21.0.1
+  - python=3.8.8
   - pip:
-    - numpy==1.18.5
-    - matplotlib==3.2.2
-    - seaborn==0.10.1
-    - pandas==1.0.5
-    - scipy==1.5.0
-    - scikit-learn==0.23.1
+    - astropy==4.2.1
+    - bokeh==2.3.2
+    - pandas==1.2.4
+    - pillow==8.2.0
+    - matplotlib==3.3.4
+    - scikit-image==0.18.1
+    - scikit-learn==0.24.1
+    - scipy==1.6.2
+    - seaborn==0.11.1
+
