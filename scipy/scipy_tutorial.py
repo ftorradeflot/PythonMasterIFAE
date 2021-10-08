@@ -64,7 +64,7 @@
 
 # # Notebook Setup (run me first!)
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 import scipy as sp
 import numpy as np
 
@@ -94,7 +94,7 @@ for k, v in const.physical_constants.items():
     
 
 
-# + jupyter={"outputs_hidden": true}
+# +
 # const?
 
 # +
@@ -142,10 +142,71 @@ print('error: {}'.format(error))
 
 # -
 
+print(covariance_matrix)
+
 plt.plot(x, y, '.', label='data')
 plt.plot(x, g(x, *params), label='fit result')
 plt.legend();
 
+# ## Non-linear least squares with boundaries: `least_squares`
+
+# We can achieve the same result with the `least_squares` method that allows also constrained optimization.
+#
+# Some reformatting is needed
+
+# +
+from scipy.optimize import least_squares
+
+def model(a, x):
+    return a[0]*x**2 + a[1]*x + a[2]
+
+def fun(a, x, y):
+    return model(a, x) - y
+    
+a0 =  [1., 1., 1.]
+res = least_squares(fun, a0, args=(x, y), method='lm')
+params = res.x
+covariance_matrix = np.linalg.inv(res.jac.T.dot(res.jac))
+
+uncertainties = np.sqrt(np.diag(covariance_matrix)) # I didn't manage to reproduce the uncertainties
+error = ((y - g(x, *res.x))**2).sum()
+
+print('a = {:5.2f} ± {:.2f}'.format(params[0], uncertainties[0]))
+print('b = {:5.2f} ± {:.2f}'.format(params[1], uncertainties[1]))
+print('c = {:5.2f} ± {:.2f}'.format(params[2], uncertainties[2]))
+print('error: {}'.format(error))
+
+# -
+
+plt.plot(x, y, '.', label='data')
+plt.plot(x, g(x, *params), label='fit result')
+plt.legend();
+
+# We can apply constraints to the variables
+
+# +
+bounds=[[0, 0, 0], [np.inf, np.inf, 5]]
+a0 =  [1., 1., 1.]
+res = least_squares(fun, a0, args=(x, y), bounds=bounds)
+params = res.x
+covariance_matrix = np.linalg.inv(res.jac.T.dot(res.jac))
+
+uncertainties = np.sqrt(np.diag(covariance_matrix)) # I didn't manage to reproduce the uncertainties
+error = ((y - g(x, *res.x))**2).sum()
+
+print('a = {:5.2f} ± {:.2f}'.format(params[0], uncertainties[0]))
+print('b = {:5.2f} ± {:.2f}'.format(params[1], uncertainties[1]))
+print('c = {:5.2f} ± {:.2f}'.format(params[2], uncertainties[2]))
+print('error: {}'.format(error))
+
+# -
+
+plt.plot(x, y, '.', label='data')
+plt.plot(x, g(x, *params), label='fit result')
+plt.legend();
+
+
+# ## Linear regression with `curve_fit`
 
 # +
 # We can use this method to do a linear regression
@@ -202,17 +263,17 @@ y += noise
 
 #params, covariance_matrix = curve_fit(f, x, y)
 
-#params, covariance_matrix = curve_fit(
-#    f, x, y,
-#    p0=[10, 2],
-#)
-
 params, covariance_matrix = curve_fit(
-    f, x, y,
-    p0=[15, 1.5],
-    sigma=yerr,
-    absolute_sigma=True,
+   f, x, y,
+   p0=[15, 2],
 )
+
+# params, covariance_matrix = curve_fit(
+#     f, x, y,
+#     p0=[15, 1.5],
+#     sigma=yerr,
+#     absolute_sigma=True,
+# )
 
 
 # plot the stuff
@@ -222,8 +283,6 @@ x_plot = np.linspace(-0.1, 1.1, 1000)
 plt.plot(x, y, '.', label='data')
 plt.plot(x_plot, f(x_plot, *params), label='fit result')
 plt.legend();
-
-
 # -
 
 # <a id=minimize></a>
@@ -231,15 +290,18 @@ plt.legend();
 
 # We define a function with two local minimums
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
+MIN_1 = np.array([2, 1])
+MIN_2 = np.array([-2, 3])
+
 def f(x, h, x1):
     return h*np.exp(-((x - x1)**2).sum(axis=-1))
 
 def g(x):
-    return -f(x, 1, np.array([2, 1])) - f(x, 2, np.array([-2, 3]))
+    return -f(x, 1, MIN_1) - f(x, 2, MIN_2)
 
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 XLIM = [-5, 5]
 YLIM = [-2.5, 7.5]
 x = np.linspace(*XLIM, 100)
@@ -254,11 +316,11 @@ plt.colorbar()
 
 # We will try to find the minimum
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 from scipy.optimize import minimize
 
 # +
-x0 = (-2, 0)
+x0 = (3, 0)
 r = minimize(g, x0=x0)
 
 plt.contourf(X, Y, Z, cmap='viridis_r')
@@ -290,31 +352,33 @@ r
 
 # Let's see where do different initial guesses lead to
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 x_range = np.linspace(-8, 8, 33)
 y_range = np.linspace(-4, 10, 29)
 
 X, Y = np.meshgrid(x_range, y_range)
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 x0_arr = np.vstack([X.reshape(-1), Y.reshape(-1)]).T
 
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 def minimize_g(x):
-    return minimize(g, x0=x).x
+    return minimize(g, x0=x, method='BFGS').x
 
 result = np.apply_along_axis(minimize_g, 1, x0_arr) # providing an initial guess is mandatory
 
-# + jupyter={"outputs_hidden": true}
-s1 = np.isclose(result, [-2, 3])
-s2 = np.isclose(result, [2, 1])
+# + tags=[]
+s1 = np.isclose(result, MIN_1)
+s2 = np.isclose(result, MIN_2)
 s3 = ~(np.logical_or(s1, s2))
 # -
 
 plt.plot(x0_arr[s1[:, 0], 0], x0_arr[s1[:, 0], 1], 'bo')
 plt.plot(x0_arr[s2[:, 0], 0], x0_arr[s2[:, 0], 1], 'ro')
 plt.plot(x0_arr[s3[:, 0], 0], x0_arr[s3[:, 0], 1], c='0.9', marker='o', linestyle='')
+plt.scatter(*MIN_1, s=200, facecolors='None', ec='k', lw=5)
+plt.scatter(*MIN_2, s=200, facecolors='None', ec='k', lw=5)
 
 # <a id=likelihood></a>
 # ### Unbinned likelihood fits
@@ -406,7 +470,7 @@ from scipy.stats import norm
 # <a id=fft></a>
 # # Fast Fourier Transforms (FFTs)
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 freq1 = 5
 freq2 = 50
 
@@ -421,7 +485,7 @@ plt.scatter(t, noisy_y, s=10, alpha=0.25, lw=0)
 plt.plot(t, y, c='k')
 plt.xlabel(r'$t \ /\ \mathrm{s}$');
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 from scipy import fftpack
 
 # +
@@ -487,19 +551,10 @@ plt.title('Sinc Function')
 
 res = quad(np.sinc, -10, 10)
 
-plt.text(-10, 0.8, r'$ \int_{{-10}}^{{10}} \mathrm{{sinc}}(x) \ dx = {result:.4f}$ ?'.format(result=res[0]))
+plt.text(-10, 0.8, r'$ \int_{{-10}}^{{10}} \mathrm{{sinc}}(x) \ dx = {result:.4f}$ ?'.format(result=res[0]));
 # -
 
-# `quad` struggles with $\mathrm{sinc}$, but it can be easily handled with Gaussian quadrature:
-
-# +
-from scipy.integrate import quadrature
-
-# quadrature may complain, but it will work in the end
-print(quadrature(np.sinc, -10, 10)[0])
-# -
-
-# This result agrees with Mathematica to 13 decimal places (even though only 11 are shown). Note that the problem is the singularity at $x=0$; if we change the boundaries to, say, [-10.1, 10], then it works fine. Also, writing our sinc function more cleverly would eliminate the problem.
+# `quad` used to struggle with `sinc` but it has been improved and it is no longer the case. Now it provides an accurate result.
 
 # <a id=sampleintegration></a>
 # ## Sample integration
@@ -572,16 +627,18 @@ f(2.5)   # uncomment to run me
 # We also need to tell `interp1d` not to raise a `ValueError` by setting the `bounds_error` keyword to `False`.
 
 # +
-z = [0.5, 1, 1.5, 2, 2.5]
+z = np.linspace(0.5, 2.5, 26)
 
 f = interp1d(x, y, bounds_error=False, fill_value=0)
-print("Option 1:", list(zip(z, f(z))))
+plt.plot(z, f(z), label='fill_value=0')
 
 f = interp1d(x, y, bounds_error=False, fill_value=y)   # fill with endpoint values
-print("Option 2:", list(zip(z, f(z))))
+plt.plot(z, f(z), label='fill_value=y')
 
 f = interp1d(x, y, fill_value='extrapolate')   # bounds_error set to False automatically
-print("Option 3:", list(zip(z, f(z))))
+plt.plot(z, f(z), label='extrapolate')
+
+plt.legend()
 # -
 
 # <a id=spline_interpolation></a>
@@ -635,7 +692,7 @@ plt.grid(linestyle='--');
 #
 # For further details you can check [the official documentation](https://docs.scipy.org/doc/scipy/reference/stats.html)
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 from scipy import stats
 # -
 
@@ -668,20 +725,20 @@ x = np.linspace(-3, 3, 100)
 plt.plot(x, std_normal.pdf(x))
 plt.title('Standard Normal - Probability Density Function')
 plt.xlabel('x')
-plt.ylabel(r'$ f(x) =  \frac{1}{\sqrt{2 \pi}} \mathrm{e}^{-\frac{1}{2} x^2}}$')
+plt.ylabel(r'$ f(x) =  \frac{1}{\sqrt{2 \pi}} \mathrm{e}^{-\frac{1}{2} x^2}}$');
 # -
 
 plt.plot(x, std_normal.cdf(x))
 plt.title('Standard Normal - Cumulative Distribution Function')
 plt.xlabel('x')
-plt.ylabel(r'$ F(x) =  \frac{1}{\sqrt{2 \pi}} \int_{-\infty}^{x}\mathrm{e}^{-\frac{1}{2} x^2}}$')
+plt.ylabel(r'$ F(x) =  \frac{1}{\sqrt{2 \pi}} \int_{-\infty}^{x}\mathrm{e}^{-\frac{1}{2} x^2}}$');
 
-x_sample = std_normal.rvs(100)
-hist_result = plt.hist(x_sample, range=[-3, 3], bins=100, normed=True)
+x_sample = std_normal.rvs(1000)
+hist_result = plt.hist(x_sample, range=[-3, 3], bins=100, density=True)
 x_plot = np.linspace(-3, 3, 100)
 plt.plot(x_plot, std_normal.pdf(x_plot))
 plt.title('Standard Normal - Random Sample')
-plt.xlabel('x')
+plt.xlabel('x');
 
 # Get the estimation of the mean and the standard deviation from a sample
 stats.norm.fit(x_sample)
@@ -763,7 +820,7 @@ plt.tight_layout()
 # <a id=multivariate_distributions></a>
 # ### Multivariate distributions
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 # Initialize a multivariate normal distribution
 mult_mean = [0.1, 2.]
 mult_cov =  [[2.0, 0.3], [0.3, 0.5]]
@@ -794,7 +851,7 @@ ax1.set_title('Probability Density Function')
 
 
 # 2D histogram of the random sample
-h = ax2.hist2d(S[:, 0], S[:, 1], bins=50, normed=True, 
+h = ax2.hist2d(S[:, 0], S[:, 1], bins=50, density=True, 
                cmap='coolwarm', range=[XLIM, YLIM],
               norm=color_norm)
 ax2.set_title('Random sample')
@@ -810,20 +867,23 @@ fig.colorbar(h[3], ax=[ax1, ax2]);
 #
 # Used to determine if a sample comes from a normal distribution
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 x_sample = stats.norm().rvs(size=1000)
 
-alpha = 1e-3
+alpha = 5e-2
 
-# + jupyter={"outputs_hidden": true}
-plt.hist(x_sample, bins=50);
+# + tags=[]
+x = np.linspace(-6, 6, 101)
+plt.hist(x_sample, bins=50, label='Sample data', density=True);
+plt.plot(x, stats.norm().pdf(x), label='N(0,1) pdf')
+plt.legend()
 
 
 # -
 
 # Normality test using `normaltest`: Tests if a sample comes from a normal distribution
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 def print_result(p, alpha):
     print("p = {:g}".format(p))
     if p < alpha:  # null hypothesis: x comes from a normal distribution
@@ -832,16 +892,30 @@ def print_result(p, alpha):
         print("The null hypothesis cannot be rejected")  
 
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 k2, p = stats.normaltest(x_sample)
-print_result(p, alpha)
+print_result(p, 5e-2)
 # -
+
+# Do the same with some additional noise
+
+w = 3
+x_noise = stats.uniform.rvs(loc=np.full_like(x_sample, -w/2), scale=w)
+
+x = np.linspace(-6, 6, 101)
+plt.hist(x_sample + x_noise, bins=50, density=True, label='Noisy data');
+plt.plot(x, stats.norm().pdf(x), label='N(0,1) pdf')
+plt.legend()
+
+
+k2, p = stats.normaltest(x_sample + x_noise)
+print_result(p, alpha)
 
 # ### Kolmogorov-Smirnov test
 #
 # To test if a sample matches a distribution.
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 l = x_sample.mean()
 s = x_sample.std(ddof=1)
 print('loc={} scale={}'.format(l, s))
@@ -858,23 +932,24 @@ print_result(p, alpha)
 # <a id=stats_example></a>
 # ## Example
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 import pandas as pd
 
+alpha = 1e-2
 df_prices = pd.read_csv('resources/stock.csv')
 df_prices.head(10)
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 _ = df_prices[['Apple', 'Microsoft']].plot(title='2016 stock prices', figsize=(6., 6.))
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 # Compute the daily relative increments
 df_incs = df_prices.drop('Date', axis=1)
 df_incs = ((df_incs - df_incs.shift(1))/df_incs.shift(1)).loc[1:, :]
 df_incs['Date'] = df_prices.Date
 df_incs.head(10)
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12., 6.))
 _ = df_incs[['Apple', 'Microsoft']].plot(ax=ax1)
 _ = ax2.scatter(df_incs['Apple'], df_incs['Microsoft'])
@@ -886,15 +961,16 @@ plt.tight_layout()
 
 # We can use the `fit` method to MLE of the mean and the std
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 # we can use the fit method to get the MLE of the mean and the std
 p = stats.norm.fit(df_incs.Apple)
+print(p)
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 # Create estimated distributions based on the sample
 app_dist = stats.norm(*p)
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 # We can test if this data fits a normal distribution (Kolmogorov-Smirnov test)
 app_K, app_p = stats.kstest(df_incs['Apple'], app_dist.cdf)
 print_result(app_p, alpha)
