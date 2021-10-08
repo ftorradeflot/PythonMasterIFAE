@@ -996,6 +996,40 @@ print_result(app_p, alpha)
 
 # -
 
+# <a id=spatial_functions></a>
+# # Spatial Functions
+#
+# A complete list of scipy spatial functions can be found [here](https://docs.scipy.org/doc/scipy-1.6.2/reference/tutorial/spatial.html).
+
+# ## Delaunay triangulation
+
+from scipy.spatial import Delaunay
+#points = np.array([[0, 0], [0, 1.1], [1, 0], [1, 1]])
+points = np.random.rand(6, 2)
+tri = Delaunay(points)
+
+plt.triplot(points[:,0], points[:,1], tri.simplices)
+plt.plot(points[:,0], points[:,1], 'o')
+for j, p in enumerate(points):
+    plt.text(p[0]-0.03, p[1]+0.03, j, ha='right') # label the points
+for j, s in enumerate(tri.simplices):
+    p = points[s].mean(axis=0)
+    plt.text(p[0], p[1], '#%d' % j, ha='center') # label triangles
+plt.xlim(-0.5, 1.5); plt.ylim(-0.5, 1.5)
+
+# ## Convex Hull
+
+# +
+from scipy.spatial import ConvexHull
+points = np.random.rand(30, 2)   # 30 random points in 2-D
+hull = ConvexHull(points)
+
+plt.plot(points[:,0], points[:,1], 'o')
+for simplex in hull.simplices:
+    plt.plot(points[simplex,0], points[simplex,1], 'k-')
+plt.show()
+# -
+
 # <a id=special_functions></a>
 # # Special Functions
 #
