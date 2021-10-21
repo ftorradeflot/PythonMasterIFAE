@@ -9,9 +9,9 @@
 #       format_version: '1.5'
 #       jupytext_version: 1.11.1
 #   kernelspec:
-#     display_name: pythonBootcamp2020
+#     display_name: PythonBootcamp2021
 #     language: python
-#     name: pythonbootcamp2020
+#     name: pythonbootcamp2021
 # ---
 
 # # Scikit-Learn (sklearn)
@@ -28,11 +28,9 @@
 # + [markdown] slideshow={"slide_type": "slide"}
 # # Machine Learning (Supervised)
 #
-# ## Mathematical Notation and Problem Description
+# ## Mathematical Notation and Problem Description 
 #
-# *For more details see "Elements of statistical Learning" by Trevor Hastie. (Available for free as an E-Book)* 
-#
-# I'll try to follow some naming conventions along this notebook. They are the same as in the book (for the most parts).
+# I'll try to follow some naming conventions along this notebook.
 #
 # * Uppercase letters such as $X$ or $Y$ denote generic aspects of a variable (i.e. the actual random variable)
 # * Observed values are written in lowercase. The ith observed value of $X$ is written as $x_i$
@@ -73,6 +71,7 @@ from ml import plots
 from ml import learning
 from importlib import reload
 reload(learning)
+reload(plots)
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
@@ -115,7 +114,7 @@ def read_titanic():
 data = read_titanic()
 data
 
-# + slideshow={"slide_type": "subslide"} jupyter={"outputs_hidden": true}
+# + slideshow={"slide_type": "subslide"} tags=[]
 data.Survived.value_counts().plot.pie(autopct='%.2f %%')
 plt.gca().set_aspect('equal')
 
@@ -176,7 +175,7 @@ plt.gca().set_aspect('equal')
 #         return 'no'
 # ```
 
-# + slideshow={"slide_type": "-"} jupyter={"outputs_hidden": true}
+# + slideshow={"slide_type": "-"}
 def f_class(passenger_class):
     return 'yes' if passenger_class == '1st' else 'no'
 
@@ -199,7 +198,7 @@ plots.plot_bars_and_confusion(truth=truth, prediction=prediction)
 #         return 'no'
 # ```
 
-# + jupyter={"outputs_hidden": true}
+# +
 def f_sex(passenger_sex):
     return 'yes' if passenger_sex == 'female' else 'no'
 
@@ -207,7 +206,7 @@ data = read_titanic()
 truth = data['Survived']
 prediction = data['Sex'].apply(f_sex)
 
-# + slideshow={"slide_type": "subslide"} jupyter={"outputs_hidden": true}
+# + slideshow={"slide_type": "subslide"}
 plots.plot_bars_and_confusion(truth=truth, prediction=prediction)
 # -
 
@@ -215,7 +214,7 @@ plots.plot_bars_and_confusion(truth=truth, prediction=prediction)
 #
 # In some cases a model may have a high accuracy but still present a bad performance. Let's see an example
 
-# + jupyter={"outputs_hidden": true}
+# +
 np.random.seed(0)
 from sklearn.datasets import make_blobs
 
@@ -241,20 +240,18 @@ plt.scatter(df_anomaly[~mask_no].x, df_anomaly[~mask_no].y, c='red', s=50, zorde
 #
 # Let's try.
 
-# + jupyter={"outputs_hidden": true}
+# +
 def is_anomaly(r):
-    return 'yes' if r.y - r.x < -1.8 else 'no'
+    return 'yes' if r.x > 2 else 'no'
 
 prediction = df_anomaly.apply(is_anomaly, axis=1)
 truth = df_anomaly.f_code
-
-# + jupyter={"outputs_hidden": true}
-plots.plot_bars_and_confusion(truth=truth, prediction=prediction)
 # -
+
+plots.plot_bars_and_confusion(truth=truth, prediction=prediction)
 
 # Looks like it works pretty well, but it doesn't.
 
-# + jupyter={"outputs_hidden": true}
 pred_mask_no = prediction == 'no'
 plt.scatter(df_anomaly[mask_no & pred_mask_no].x, df_anomaly[mask_no & pred_mask_no].y, c='b', zorder=0)
 plt.scatter(df_anomaly[~pred_mask_no].x, df_anomaly[~pred_mask_no].y,
@@ -262,7 +259,6 @@ plt.scatter(df_anomaly[~pred_mask_no].x, df_anomaly[~pred_mask_no].y,
 plt.scatter(df_anomaly[~mask_no].x, df_anomaly[~mask_no].y, c='limegreen',
             s=50, zorder=10, label='Truth yes')
 plt.legend()
-# -
 
 # If we look closer, the number of True Positives is 0, so Precission and Recall will both be 0.
 #
@@ -359,7 +355,7 @@ plt.legend()
 #
 #         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
 
-# + slideshow={"slide_type": "fragment"} jupyter={"outputs_hidden": true}
+# + slideshow={"slide_type": "fragment"}
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 
@@ -387,14 +383,12 @@ plots.plot_bars_and_confusion(truth=y_test, prediction=y_prediction)
 # * And with other fields?
 # * Can we just ignore them?
 
-# + jupyter={"outputs_hidden": true}
 fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10., 10.))
 plots.plot_bins_perc(data, 'Sex_Code', 'Survived_Code', var_type='discrete', ax=ax1)
 plots.plot_bins_perc(data, 'Pclass_Code', 'Survived_Code', var_type='discrete', ax=ax2)
 plots.plot_bins_perc(data, 'Fare', 'Survived_Code', var_type='continuous', ax=ax3)
 plots.plot_bins_perc(data, 'Age', 'Survived_Code', var_type='continuous', ax=ax4)
 plt.tight_layout()
-# -
 
 # ## Regularization 
 #
@@ -428,7 +422,7 @@ plt.tight_layout()
 #
 # We will have to decide which value of $\alpha$ to use. How?
 
-# + jupyter={"outputs_hidden": true}
+# +
 from sklearn import linear_model
 from sklearn.model_selection import train_test_split
 
@@ -519,7 +513,6 @@ ax2.legend(loc='center right')
 # x' = \frac{x - min(x)}{max(x) - min(x)}
 # $$
 
-# + jupyter={"outputs_hidden": true}
 set_sns()
 
 # + [markdown] slideshow={"slide_type": "slide"}
@@ -534,9 +527,9 @@ set_sns()
 # And what if the data cannot be seperated by a plane?
 #
 
-# + slideshow={"slide_type": "subslide"} jupyter={"outputs_hidden": true}
+# + slideshow={"slide_type": "subslide"}
 # many possible lines to separate the data. Which one is 'better'?
-from sklearn.datasets.samples_generator import make_blobs
+from sklearn.datasets import make_blobs
 X, y = make_blobs(n_samples=150, centers=2,
                   random_state=3, cluster_std=0.70)
 
@@ -565,9 +558,9 @@ None
 #
 # <p style="color:gray"> Note that, to fit the definition above, the label encoding has to be $y_i \in {-1, 1}$</p>
 
-# + slideshow={"slide_type": "subslide"} jupyter={"outputs_hidden": true}
+# + slideshow={"slide_type": "subslide"}
 from sklearn.svm import SVC
-from sklearn.datasets.samples_generator import make_blobs
+from sklearn.datasets import make_blobs
 
 X, y = make_blobs(n_samples=150, centers=2,
                   random_state=3, cluster_std=0.70)
@@ -596,8 +589,8 @@ None
 #
 # Heres an example of (artificial) data which cannot be seperated by a line.
 
-# + slideshow={"slide_type": "subslide"} jupyter={"outputs_hidden": true}
-from sklearn.datasets.samples_generator import make_moons
+# + slideshow={"slide_type": "subslide"}
+from sklearn.datasets import make_moons
 
 X, y = make_moons(n_samples=200, noise=0.10)
 plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='winter')
@@ -616,7 +609,7 @@ plots.draw_svm_decission_function(clf, colors='black')
 #
 # We can exploit that
 
-# + slideshow={"slide_type": "subslide"} jupyter={"outputs_hidden": true}
+# + slideshow={"slide_type": "subslide"}
 from mpl_toolkits import mplot3d
 set_mpl()
 
@@ -640,10 +633,10 @@ ax.set_ylabel('X2')
 ax.set_zlabel('r')
 
 
-# + jupyter={"outputs_hidden": true} slideshow={"slide_type": "skip"}
+# + slideshow={"slide_type": "skip"}
 set_sns()
 
-# + slideshow={"slide_type": "subslide"} jupyter={"outputs_hidden": true}
+# + slideshow={"slide_type": "subslide"}
 X, y = make_moons(n_samples=200, noise=0.10)
 plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='winter')
 
@@ -651,19 +644,59 @@ clf = SVC(kernel='rbf', C=1) #use the radial basis function instead of the linea
 clf.fit(X, y)
 plots.draw_svm_decission_function(clf, colors='black', label='SVM')
 
+# + slideshow={"slide_type": "subslide"}
+gamma = 1
+
+def compute_rbf(X, X0=None, gamma=1):
+    '''This method computes the RBF based on X'''
+    if X0 is None:
+        X0 = X
+    
+    X_norm = np.sum(X ** 2, axis = -1)
+    X0_norm = np.sum(X0**2, axis = -1)
+    
+    K = np.exp(-gamma * (X_norm[:,None] + X0_norm[None,:] - 2 * np.dot(X, X0.T)))
+    return K
+
+# Generate the random data and plot it
+X, y = make_moons(n_samples=200, noise=0.10)
+plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='winter')
+
+# Add additional features using RBF
+K = compute_rbf(X, gamma=gamma)
+XK = np.hstack([X, K])
+
+# Train SVM model using a linear kernel
+clf = SVC(kernel='linear', C=1)
+clf.fit(XK, y)
+
+# Plot the decision boundary
+ax = plt.gca()
+x_low, x_high = ax.get_xlim()
+y_low, y_high = ax.get_ylim()
+x1 = np.linspace(x_low, x_high, 40)
+x2 = np.linspace(y_low, y_high, 40)
+
+X1, X2 = np.meshgrid(x1, x2)
+xy = np.vstack([X1.ravel(), X2.ravel()]).T
+k = compute_rbf(xy, X0=X, gamma=gamma)
+xyz = np.hstack([xy, k])
+
+Z = clf.decision_function(xyz).reshape(X1.shape)
+
+cs = ax.contour(X1, X2, Z, levels=[-1., 0, 1.0], linestyles=['--', '-', '--'], colors='k')
+cs.collections[0].set_label('SVM Decission Boundary')
+plt.axis('off');
+
 # + [markdown] slideshow={"slide_type": "subslide"}
 # The same approach works for other linear methods as well. 
 #
 # What makes SVM's so special?:
 #
 # # + SVM's have proven to perform very well for many use-cases.
-#
 # # + SVM's handle large number of dimensions relativly fast.
-#
 # # + The kernel functions basically come for free.
-#
 # # + Easily extendable to multi-class problems.
-#
 #
 # Kernel functions are constrained to fulfill certain criteria. *(See Chapter 12.3.1 in the Hastie Book)*
 
@@ -683,22 +716,21 @@ plots.draw_svm_decission_function(clf, colors='black', label='SVM')
 #
 # One can however try approximate the solution using binary recursive splits in the parameter space.
 
-# + jupyter={"outputs_hidden": true}
+# +
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
 from sklearn.datasets import make_moons
 np.random.seed(1234)
 
 X, y = make_moons(n_samples=1000, noise=0.30)
+# -
 
-# + jupyter={"outputs_hidden": true}
 plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='winter')
 
-# + jupyter={"outputs_hidden": true}
 clf = DecisionTreeClassifier(max_depth=5, criterion='entropy')
 clf.fit(X, y)
 
-# + slideshow={"slide_type": "subslide"} jupyter={"outputs_hidden": true}
+# + slideshow={"slide_type": "subslide"}
 plt.scatter(X[:, 0], X[:, 1], c=y, s=50, cmap='winter')
 plots.draw_decission_boundaries(clf)
 # -
@@ -719,9 +751,7 @@ plots.draw_decission_boundaries(clf)
 #             return {'node' : (variable, split_point), 'left': left_tree, 'right': right_tree}
 #             
 
-# + jupyter={"outputs_hidden": true}
 tree.plot_tree(clf, max_depth=2, filled=True);
-# -
 
 # For classification the best split in a node $m$ of the tree is found by minimizing an impurity measure $Q_m$.
 #
@@ -739,7 +769,7 @@ tree.plot_tree(clf, max_depth=2, filled=True);
 #
 # What's happening?
 
-# + jupyter={"outputs_hidden": true}
+# +
 from sklearn.model_selection import ParameterGrid, train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.tree import DecisionTreeClassifier
@@ -896,7 +926,7 @@ bv.plot_bias_variance_tradeoff(R=1000, n_test=1000, d_arr=[0, 1, 2, 3, 4])
 # This quickly leads to overfitted tree models.
 #
 
-# + jupyter={"outputs_hidden": true}
+# +
 np.random.seed(1)
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.datasets import make_moons
@@ -947,7 +977,7 @@ plots.draw_decission_boundaries(clf)
 #
 # Random Forests are a very popular choice for classification tasks since their parameters can be easily tuned and they often outperform other methods.
 
-# + jupyter={"outputs_hidden": true}
+# +
 np.random.seed(2)
 from sklearn.metrics import roc_curve, roc_auc_score, make_scorer
 from sklearn.tree import DecisionTreeClassifier
@@ -960,13 +990,13 @@ y = data['Survived_Code']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
 
-# + jupyter={"outputs_hidden": true}
+# +
 rf = RandomForestClassifier(n_estimators=20, max_depth=5)
 rf.fit(X_train, y_train)
 
 plots.plot_bars_and_confusion(truth=y_test, prediction=rf.predict(X_test))
 
-# + jupyter={"outputs_hidden": true}
+# +
 df = pd.DataFrame()
 ps = ParameterGrid({'max_depth':range(1, 20), 'criterion':['entropy', 'gini']})
 for d in ps:
@@ -995,7 +1025,7 @@ sns.heatmap(df, cmap='YlOrRd', annot=True, fmt='.3f')
 #
 # One can visualize this problem by looking at the following plot.
 
-# + jupyter={"outputs_hidden": true}
+# +
 import matplotlib
 cmap = matplotlib.cm.get_cmap('Set1')
 np.random.seed(1234)
@@ -1048,7 +1078,7 @@ None
 # 4. Repeat steps 2 and 3 until convergence.
 #
 
-# + jupyter={"outputs_hidden": true}
+# +
 np.random.seed(1234)
 from sklearn.cluster import KMeans
 
@@ -1069,7 +1099,7 @@ None
 # The k-Means algorithm works well on convex clusters with similar standard deviations. But it fails on elongated or concave shapes.
 #
 
-# + jupyter={"outputs_hidden": true}
+# +
 np.random.seed(170)
 X, y = make_blobs(n_samples=300, centers=3,)
 transformation = [[0.4, -0.8], [-0.4, 0.4]]
@@ -1101,14 +1131,12 @@ None
 # https://en.wikipedia.org/wiki/Expectation–maximization_algorithm
 #
 
-# + jupyter={"outputs_hidden": true}
 from sklearn.mixture import GaussianMixture
 gm = GaussianMixture(n_components=3).fit(X_elongated)
 prediction = gm.predict(X_elongated)
 plt.scatter(X_elongated[:, 0], X_elongated[:, 1], c=cmap(prediction))
 plt.axis('off')
 None
-# -
 
 # # Other stuff
 #
@@ -1129,8 +1157,8 @@ None
 #
 # To put it in words. We assume $x$ will have the same $y$ as other points nearby.
 
-# + slideshow={"slide_type": "subslide"} jupyter={"outputs_hidden": true}
-from sklearn.datasets.samples_generator import make_moons
+# + slideshow={"slide_type": "subslide"}
+from sklearn.datasets import make_moons
 from sklearn.neighbors import KNeighborsClassifier
 
 X, y = make_moons(n_samples=200, noise=0.05)
@@ -1148,7 +1176,7 @@ plots.draw_decission_boundaries(knn)
 #
 # Real world data always has some form of noise.
 
-# + jupyter={"outputs_hidden": true}
+# +
 np.random.seed(1234)
 from sklearn.metrics import accuracy_score
 from sklearn.neighbors import KNeighborsClassifier
@@ -1173,7 +1201,7 @@ ax2.set_title('Accuracy for k=1 : {}'.format(accuracy_score(y, knn.predict(X))))
 ax2.axis('off')
 None
 
-# + jupyter={"outputs_hidden": true}
+# +
 np.random.seed(1234)
 
 X, y = make_moons(n_samples=200, noise=0.7)
@@ -1196,7 +1224,7 @@ ax2.set_title('Accuracy on Test Sample for k=1 : {}'.format(accuracy_score(y_tes
 ax2.axis('off')
 None
 
-# + jupyter={"outputs_hidden": true}
+# +
 from sklearn.metrics import mean_squared_error
 
 np.random.seed(1234)
@@ -1211,7 +1239,7 @@ for k in range(1, 200):
     e_train.append(mean_squared_error(y, knn.predict(X)))
     e_test.append(mean_squared_error(y_test, knn.predict(X_test)))
 
-# + jupyter={"outputs_hidden": true}
+# +
 plt.plot(range(1, 200), e_train,'.', color='#FF6B6B', ms=10, label='Training Sample')
 plt.plot(range(1, 200), e_test, '.' ,color='#FFAE6B', ms=10, label='Test Sample', )
 plt.xlim(200, 0)
@@ -1237,7 +1265,7 @@ plt.legend()
 #
 # The model is then trained on $k-1$ subsets and evaluated on the remaining set. 
 
-# + slideshow={"slide_type": "-"} jupyter={"outputs_hidden": true}
+# + slideshow={"slide_type": "-"}
 # %%HTML
     <style>
     .training_set { fill: #FF6B6B;}
@@ -1314,7 +1342,7 @@ plt.legend()
 <p>...</p>
 <p>...</p>
 
-# + jupyter={"outputs_hidden": true}
+# +
 np.random.seed(2)
 from sklearn.metrics import roc_curve, roc_auc_score, make_scorer
 from sklearn.model_selection import cross_validate
@@ -1370,7 +1398,7 @@ sns.heatmap(df, cmap='YlOrRd', annot=True, fmt='.3f')
 # In this case the decission threshold corresponds to the distance of a point to the seperating hyperplane.
 #
 
-# + jupyter={"outputs_hidden": true}
+# +
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import linear_model
@@ -1431,7 +1459,7 @@ None
 #
 # where $\alpha$ is a parameter which can be chosen freely (or optimized according to some criterion which has nothing to do with the underlying loss function of the predictor.)
 
-# + jupyter={"outputs_hidden": true}
+# +
 from sklearn.svm import SVC
 from sklearn.datasets import make_moons
 
@@ -1487,7 +1515,7 @@ None
 #
 # See https://classeval.wordpress.com for some very good discussions on classifier evaluation.
 
-# + jupyter={"outputs_hidden": true}
+# +
 from sklearn.datasets import make_classification
 from sklearn.metrics import roc_curve
 
@@ -1517,27 +1545,25 @@ plt.ylabel('True Positive Rate')
 #
 # Lets try and use regression to predict housing prices.
 
-# + jupyter={"outputs_hidden": true}
+# +
 from sklearn.datasets import load_boston
 from IPython.display import Markdown, display
 houses = load_boston()
 
 display(Markdown(houses.DESCR))
+# -
 
-# + jupyter={"outputs_hidden": true}
 names = list(houses['feature_names']) +  ['price']
 data = pd.DataFrame(data=np.c_[houses['data'], houses['target']], columns=names)
 data
-# -
 
 # Our regression task is to predict the price of a house from the 13 given variables. From a plot of some of the variables we can see some weak correlations in some variables.
 #
 # None of these variables alone would suffice to build a good predictor. Hence we try to use multivariate regression methods.
 
-# + jupyter={"outputs_hidden": true}
 sns.pairplot(data[['INDUS', 'RM', 'NOX', 'AGE', 'price']])
 
-# + jupyter={"outputs_hidden": true}
+# +
 from sklearn.linear_model import LinearRegression
 from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
@@ -1563,7 +1589,7 @@ reg = RandomForestRegressor()
 score = cross_validate(reg, X, y, cv=5, scoring='neg_mean_absolute_error')
 print('Score RandomForestRegressor {:0.3f} +/- {:0.3f}'.format(score['test_score'].mean(), score['test_score'].std()))
 
-# + jupyter={"outputs_hidden": true}
+# +
 reg = RandomForestRegressor()
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
 reg.fit(X_train, y_train)
@@ -1624,56 +1650,44 @@ None
 #
 # The principal components are sensitive to the scale of measurement, now to fix this issue we should always standardize variables before applying PCA. Applying PCA to your data set loses its meaning. If interpretability of the results is important for your analysis, PCA is not the right technique for your project.
 
-# + jupyter={"outputs_hidden": true}
 from ml import learning
 df_features = learning.read_features_file('resources/F_DR14_ZooSpec_10000.csv')
 
-# + jupyter={"outputs_hidden": true}
 df_features
-# -
 
 # What is this?
 
-# + jupyter={"outputs_hidden": true}
 learning.plot_mosaic(df_features.values[:16, :], [4,4], [64, 64])
 
-# + jupyter={"outputs_hidden": true}
 from sklearn.decomposition import PCA
 pca = PCA(n_components=256)
 pca.fit(df_features);
-# -
 
 # What's the quantity of information preserved?
 
-# + jupyter={"outputs_hidden": true}
-from matplotlib.ticker import FormatStrFormatter
+# +
+fig, ax = plt.subplots()
 
-fig, ax = plt.subplots(1, 1)
-
-ax.semilogy(np.cumsum(pca.explained_variance_ratio_))
+info = np.cumsum(pca.explained_variance_ratio_)
+ax.plot(info, '.-', markersize=7)
 ax.axhline(y=0.9, color='r')
 ax.axhline(y=0.95, color='r')
 ax.axhline(y=0.99, color='r')
-ax.grid(color='k', linestyle='--')
+
 ax.set_xlabel('Number of dimensions')
 ax.set_ylabel('Quantity of information');
-for t in (True, False):
-    vals = ax.get_yticks(minor=t)
-    ax.set_yticklabels(['{:,.2%}'.format(x) for x in vals], minor=t)
+ax.yaxis.set_minor_formatter('{x:,.2%}')
+ax.yaxis.set_major_formatter('{x:,.2%}')
+# -
 
-# + jupyter={"outputs_hidden": true}
 features_PCA = pca.transform(df_features)
 
-# + jupyter={"outputs_hidden": true}
 features_PCA.shape
 
-# + jupyter={"outputs_hidden": true}
 learning.plot_mosaic(features_PCA[:16, :], [4,4], [16, 16])
 
-# + jupyter={"outputs_hidden": true}
 comp = pca.components_
 learning.plot_mosaic(comp[:16, :], [4,4], [64, 64])
-# -
 
 # # More Material
 #
@@ -1696,6 +1710,3 @@ learning.plot_mosaic(comp[:16, :], [4,4], [64, 64])
 # http://cs231n.github.io
 #
 #
-
-# + jupyter={"outputs_hidden": true}
-
