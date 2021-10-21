@@ -581,9 +581,9 @@ ax.add_collection(p)
 patch_list = []
 hel = 30
 we = 0
-patch_list.append(Ellipse((wc + 2, hel), 1, 2))
-patch_list.append(Ellipse([wc + 6, hel], 2, 0.5))
-patch_list.append(Ellipse([wc + 12, hel], 2, 4, 45))
+patch_list.append(Ellipse((we + 2, hel), 1, 2))
+patch_list.append(Ellipse([we + 6, hel], 2, 0.5))
+patch_list.append(Ellipse([we + 12, hel], 2, 4, 45))
 p = PatchCollection(patch_list, **kwargs3)
 ax.add_collection(p)
 
