@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.1
+#       jupytext_version: 1.13.6
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -92,10 +92,10 @@ const.convert_temperature(100, old_scale='C', new_scale='K')
 for k, v in const.physical_constants.items():
     print(k, ':', v)
     
+# -
 
 
-# +
-# const?
+const
 
 # +
 val, unit, uncertainty = const.physical_constants['muon mass energy equivalent in MeV']
@@ -185,13 +185,13 @@ plt.legend();
 # We can apply constraints to the variables
 
 # +
-bounds=[[0, 0, 0], [np.inf, np.inf, 5]]
+bounds=[[0, -np.inf, -np.inf], [np.inf, np.inf, np.inf]]
 a0 =  [1., 1., 1.]
-res = least_squares(fun, a0, args=(x, y), bounds=bounds)
+res = least_squares(fun, a0, args=(x, y), bounds=bounds, loss='soft_l1')
 params = res.x
 covariance_matrix = np.linalg.inv(res.jac.T.dot(res.jac))
 
-uncertainties = np.sqrt(np.diag(covariance_matrix)) # I didn't manage to reproduce the uncertainties
+uncertainties = np.sqrt(np.diag(covariance_matrix))
 error = ((y - g(x, *res.x))**2).sum()
 
 print('a = {:5.2f} ± {:.2f}'.format(params[0], uncertainties[0]))
@@ -335,7 +335,7 @@ plt.plot([r.x[0]], [r.x[1]], 'ro-')
 # +
 global min_path
 
-min_path = [(4., 1.)]
+min_path = [(3., 0.)]
 
 def store_path(x):
     min_path.append(x)
@@ -364,7 +364,7 @@ x0_arr = np.vstack([X.reshape(-1), Y.reshape(-1)]).T
 
 # + tags=[]
 def minimize_g(x):
-    return minimize(g, x0=x, method='BFGS').x
+    return minimize(g, x0=x, method='CG').x
 
 result = np.apply_along_axis(minimize_g, 1, x0_arr) # providing an initial guess is mandatory
 
@@ -465,7 +465,9 @@ print('Fit: λ = {:.2f} ± {:.2f}'.format(result.x[0], np.sqrt(result.hess_inv[0
 
 from scipy.stats import norm
 
+# + jupyter={"outputs_hidden": true}
 
+# -
 
 # <a id=fft></a>
 # # Fast Fourier Transforms (FFTs)
@@ -916,8 +918,9 @@ print_result(p, alpha)
 # To test if a sample matches a distribution.
 
 # + tags=[]
-l = x_sample.mean()
-s = x_sample.std(ddof=1)
+x_noisy = x_sample + x_noise
+l = x_noise.mean()
+s = x_noise.std(ddof=1)
 print('loc={} scale={}'.format(l, s))
 
 k, p = stats.kstest(x_sample, stats.norm(l, s).cdf)
@@ -1040,7 +1043,7 @@ plt.show()
 
 # Consider this noisy data set with outliers. The data is a so-called S-curve, and we want to identify the midpoint of the falling edge.
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 from scipy.special import ndtr
 
 def s_curve(x, a, b):
@@ -1067,7 +1070,7 @@ print('Fit value:', params[1])
 
 # You can see clearly in the data that the mid-point of the S-curve is at about x=3 (which is the real value), but the outliers destroy the fit. We can remove them easily with a median filter. A median filter is particularly suited to edge detection cases, since it tends to preserve edges well.
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 from scipy.signal import medfilt
 
 filtered_y = medfilt(y)
@@ -1088,7 +1091,7 @@ plt.legend();
 
 # The following is an example implementation of a low-pass [Butterworth filter](https://en.wikipedia.org/wiki/Butterworth_filter):
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 from scipy.signal import butter, lfilter
 
 def lowpass_filter(data, cutoff, fs, order=5):
@@ -1110,7 +1113,7 @@ def lowpass_filter(data, cutoff, fs, order=5):
 
 # You are the unfortunate recipient of the following noisy data, which contains noise at two different (unknown) frequencies:
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 data = np.genfromtxt('resources/scipy_filter_data.dat')
 t = data[:, 0]
 y = data[:, 1]
@@ -1120,7 +1123,7 @@ plt.plot(t, y);   # these are your data
 
 # Somewhere in this mess is a Gaussian:
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 from scipy.stats import norm
 
 def gaussian(x, mu, sigma, A):
@@ -1138,7 +1141,7 @@ def gaussian(x, mu, sigma, A):
 # <a id=bessel></a>
 # ## Bessel functions
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 from scipy.special import jn
 
 x = np.linspace(0, 10, 100)
@@ -1147,7 +1150,7 @@ for n in range(6):
 plt.grid()
 plt.legend();
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 import mpl_toolkits.mplot3d.axes3d as plt3d
 from matplotlib.colors import LogNorm
 
@@ -1185,7 +1188,7 @@ None
 # $$\mathrm{erf}(z) = \frac{2}{\sqrt{\pi}} \int_0^z \exp\left( -t^2 \right) dt $$
 # $$\mathrm{ndtr}(z) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^z \exp\left( \frac{-t^2}{2} \right) dt $$
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 from scipy.special import erf, ndtr
 
 def gaussian(z):
@@ -1202,7 +1205,7 @@ plt.legend(loc='best');
 # <a id=ortho_polys></a>
 # ## Orthogonal Polynomials
 
-# + jupyter={"outputs_hidden": true}
+# + tags=[]
 from scipy.special import eval_legendre, eval_laguerre, eval_hermite, eval_chebyt
 
 ortho_poly_dict = {'Legendre': eval_legendre,
