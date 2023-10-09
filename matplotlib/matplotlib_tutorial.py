@@ -25,10 +25,10 @@
 
 # +
 # matplotlib inline plotting
-# %matplotlib inline
+# # %matplotlib inline
 
 # There's also a backend for interactive exploration
-# # %matplotlib ipympl
+# %matplotlib ipympl
 
 # +
 import matplotlib.pyplot as plt
@@ -755,6 +755,98 @@ grid = sns.jointplot(x=v1, y=v2, alpha=0.4);
 #grid.ax_joint.set_aspect('equal')
 
 # And much more ... https://seaborn.pydata.org/
+
+# + [markdown] toc-hr-collapsed=true
+# ## Bokeh 
+#
+# Python library to produce interactive plots
+#
+# https://docs.bokeh.org/en/latest/index.html
+# -
+
+import numpy as np
+from bokeh.io import push_notebook, show, output_notebook
+from bokeh.models import HoverTool
+from bokeh.plotting import figure 
+output_notebook()
+
+# +
+N = 4000
+x = np.random.random(size=N) * 100
+y = np.random.random(size=N) * 100
+radii = np.random.random(size=N) * 1.5
+colors = np.array([(r, g, 150) for r, g in zip(50+2*x, 30+2*y)], dtype="uint8")
+
+TOOLS="hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom,undo,redo,reset,tap,save,box_select,poly_select,lasso_select,examine,help"
+
+p = figure(tools=TOOLS)
+
+p.scatter(x, y, radius=radii,
+          fill_color=colors, fill_alpha=0.6,
+          line_color=None)
+
+show(p, notebook_handle=True)
+# -
+
+# ## plotly
+#
+# https://plotly.com/python/
+
+import plotly.express as px
+df = px.data.iris()
+fig = px.scatter(df, x="sepal_width", y="sepal_length", color='petal_length')
+fig.show()
+
+# # Interactive plotting
+
+# ## with ipympl
+#
+# By changing the backend ( %matplotlib inline -> %matplotlib ipympl ) . We will already have interactive exploration for free.
+#
+# Change the backend, restart the notebook and regenerate any of the previous plots
+#
+# The data in the plots can be dynamically updated.
+
+# +
+# One can bound figure attributes to other widget values.
+from ipywidgets import AppLayout, FloatSlider
+
+plt.ioff()
+
+slider = FloatSlider(
+    orientation='horizontal',
+    description='Factor:',
+    value=1.0,
+    min=0.02,
+    max=2.0
+)
+
+slider.layout.margin = '0px 30% 0px 30%'
+slider.layout.width = '40%'
+
+fig = plt.figure()
+fig.canvas.header_visible = False
+fig.canvas.layout.min_height = '400px'
+plt.title('Plotting: y=sin({} * x)'.format(slider.value))
+
+x = np.linspace(0, 20, 500)
+
+lines = plt.plot(x, np.sin(slider.value * x))
+
+def update_lines(change):
+    plt.title('Plotting: y=sin({} * x)'.format(change.new))
+    lines[0].set_data(x, np.sin(change.new * x))
+    fig.canvas.draw()
+    fig.canvas.flush_events()
+
+slider.observe(update_lines, names='value')
+
+AppLayout(
+    center=fig.canvas,
+    footer=slider,
+    pane_heights=[0, 6, 1]
+)
+# -
 
 # <a id=exercise_3></a>
 # # Exercise 3
