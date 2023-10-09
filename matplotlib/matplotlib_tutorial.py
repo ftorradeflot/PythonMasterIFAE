@@ -21,22 +21,23 @@
 # <a id=setup></a>
 # # Notebook Setup (run me first!)
 
-# First, we apply a "magic command" to make plots appear "inline" inside the notebook. Alternatively, we could allow plots to appear in a separate window.
+# First, we apply a "magic command" to make plots appear "inline" inside the notebook
 
 # +
 # matplotlib inline plotting
 # %matplotlib inline
 
-# There's also notebook plotting (interactive exploration)
-# # %matplotlib notebook
+# There's also a backend for interactive exploration
+# # %matplotlib ipympl
 
+# +
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import HTML
 from pathlib import Path
 
 # Make the size and fonts larger for this presentation
-plt.rcParams['figure.figsize'] = (12, 10)
+plt.rcParams['figure.figsize'] = (10, 6)
 plt.rcParams['font.size'] = 16
 plt.rcParams['lines.linewidth'] = 2
 # -
@@ -76,8 +77,8 @@ min_temp = np.array([-30.6, -34.3, -26.7, -11.7, -6.1, 1.1, 3.9, 3.3, -2.1, -8.2
 max_temp = np.array([21.7, 19.4, 31.7, 30.6, 36.7, 40.6, 40.6, 37.2, 37.2, 32.8, 26.1, 20.0])
 
 # +
-plt.plot(months, min_temp) #, c='0.2')
-plt.plot(months, max_temp) #, color='0.2')
+plt.plot(months, min_temp)#, c='0.2')
+plt.plot(months, max_temp)#, color='0.2')
 #plt.ylabel('$^\circ$C')
 
 #plt.fill_between(months, min_temp, max_temp, color='lightgray')
@@ -221,7 +222,7 @@ plt.bar(range(1, 13), renewable, label='Renewable')
 plt.bar(range(1, 13), non_renewable, bottom=renewable, label='Non renewable')
 
 plt.xticks(range(1, 13), power_labels, rotation=45, ha='right')
-plt.hlines(50, 0, 13)
+plt.hlines(50, 0, 13, colors='k')
 plt.legend()
 
 #plt.yticks([]);
@@ -552,7 +553,7 @@ hel = 30
 we = 0
 patch_list.append(Ellipse((we + 2, hel), 1, 2))
 patch_list.append(Ellipse([we + 6, hel], 2, 0.5))
-patch_list.append(Ellipse([we + 12, hel], 2, 4, 45))
+patch_list.append(Ellipse([we + 12, hel], 2, 4, angle=45))
 p = PatchCollection(patch_list, **kwargs3)
 ax.add_collection(p)
 
@@ -729,8 +730,11 @@ ax = fig.add_subplot(111, projection='3d')
 ax.plot_surface(x, y, z, cmap='viridis')
 # -
 
-# <a id=seaborn></a>
+# # Other plotting libraries
+#
 # ## Seaborn
+#
+# High-level plotting library on top of maplotlib
 
 import seaborn as sns
 
