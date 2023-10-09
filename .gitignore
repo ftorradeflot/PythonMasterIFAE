@@ -1,4 +1,6 @@
 .*
 !.gitignore
-
 *.ipynb
+
+# Tutorial specific files/folders
+matplotlib/plots

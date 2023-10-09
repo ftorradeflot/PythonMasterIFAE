@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.15.2
+#       jupytext_version: 1.14.7
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -17,38 +17,6 @@
 # # Visualisation using
 #
 # ![Matplotlib](http://upload.wikimedia.org/wikipedia/en/5/56/Matplotlib_logo.svg)
-
-# # Table of Contents
-#
-# 1. [Notebook Setup](#setup)
-# 2. [Simple Line Plots](#line_plots)
-# 3. [Histograms](#histograms)
-#     * [1D](#histogram_1d)
-#     * [2D](#histogram_2d)
-# 4. [Bar Plots](#bar)   
-#     * [Simple Bar Plot](#simple_bar)
-#     * [Multiple Bar Plot](#multiple_bar)
-#     * [Stacked Bar Plot](#stacked_bar)
-# 5. [Scatter Plots](#scatter)
-# 6. [Exercise 1](#exercise_1)
-# 7. [matplotlib architecture](#architecture)
-# 8. [Multiple Plots](#multiple_plots)
-#     * [Shared Axis](#shared_axis)
-#     * [Gridspec](#gridspec)
-#     * [Inset Plots](#inset_plots)
-# 9. [Exercise 2](#exercise_2)
-# 10. [Other Stuff](#other_stuff)
-#     * [Image Plot](#plot_image)
-#     * [Box Plot](#box_plot)
-#     * [Pie Charts](#pie_chart)
-#     * [Projections](#projections)
-#     * [Plot Styles](#plot_styles)
-#     * [Save Figures](#save_figures)
-#     * [Animations](#animations)    
-#     * [3D plots](#3d_plots)
-#     * [Seaborn](#seaborn)
-# 11. [Exercise 3](#exercise_3)
-#
 
 # <a id=setup></a>
 # # Notebook Setup (run me first!)
@@ -65,6 +33,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import HTML
+from pathlib import Path
 
 # Make the size and fonts larger for this presentation
 plt.rcParams['figure.figsize'] = (12, 10)
@@ -665,7 +634,7 @@ def plot_stuff():
     plt.subplot(2, 2, 2)
     x = np.linspace(-1, 1, 10)
     y = np.exp(-2.2*x) + np.random.normal(0, 0.1, 10)
-    yerr = np.random.normal(0, 0.2, 10)
+    yerr = np.abs(np.random.normal(0, 0.2, 10))
     plt.errorbar(x, y, yerr, fmt='o', capsize=3)
     plt.yscale('log')
 
@@ -700,18 +669,16 @@ pwd()
 x = np.linspace(-5, 5)
 plt.plot(x, x**3, marker='s')
 plt.title("My Awesome Plot")
+plot_folder = Path('plots')
 
-# save in current directory; extension determines file type
-plt.savefig('awesome_plot.pdf')
-plt.savefig('awesome_plot.eps')
-plt.savefig('awesome_plot.png', dpi=300)   # bitmap graphics; don't use me for publications!
-plt.savefig('awesome_plot.jpg', dpi=300)   # bitmap graphics; don't use me either!
-
-# relative path with subdirectory
-# plt.savefig('build/awesome_plot.pdf')
+# save in dedicated directory; extension determines file type
+plt.savefig(plot_folder / 'awesome_plot.pdf')
+plt.savefig(plot_folder / 'awesome_plot.eps')
+plt.savefig(plot_folder / 'awesome_plot.png', dpi=300)
+plt.savefig(plot_folder / 'awesome_plot.jpg', dpi=300)
 
 # absolute path
-# plt.saveig('/path/to/output/directory/awesome_plot.pdf')
+# plt.savefig('/path/to/output/directory/awesome_plot.pdf')
 # -
 
 # <a id=animations></a>
@@ -780,7 +747,7 @@ plt.hist([v1, v2], histtype='barstacked', density=True);
 v3 = np.concatenate((v1,v2))
 sns.kdeplot(v3);
 
-grid = sns.jointplot(v1, v2, alpha=0.4);
+grid = sns.jointplot(x=v1, y=v2, alpha=0.4);
 #grid.ax_joint.set_aspect('equal')
 
 # And much more ... https://seaborn.pydata.org/
