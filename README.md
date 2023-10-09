@@ -22,7 +22,7 @@ To be able to use the environment you have to activate it:
 conda activate PythonBootcamp2023
 ```
 
-## Launch a notebook server
+## Launching a notebook server
 
 Start a jupyterlab notebook server
 
