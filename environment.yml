@@ -1,26 +1,24 @@
-name: PythonBootcamp2022
+name: PythonBootcamp2023
 channels:
   - conda-forge
   - defaults
 dependencies:
-  - ipywidgets=8.0.2
-  - jupyterlab=3.4.8
-  - jupyterlab_widgets=3.0.3
+  - astropy=5.1
+  - bokeh=3.2.1
+  - ipywidgets=8.0.4
+  - jupyterlab=3.6.3
+  - jupyterlab_widgets=3.0.5
   - jupytext=1.14.0
-  - nodejs=18.10.0
-  - numpy=1.20.1
-  - pip=22.2.2
-  - python=3.9.13
-  - pip:
-    - astropy==5.1
-    - bokeh==2.4.3
-    - fitsio==1.1.8
-    - pandas==1.5.0
-    - pillow==9.2.0
-    - matplotlib==3.6.0
-    - scikit-image==0.19.3
-    - scikit-learn==1.1.2
-    - scipy==1.9.1
-    - seaborn==0.11.2
-    - sqlalchemy==1.4.41
+  - matplotlib=3.7.2
+  - nodejs=18.16.0
+  - numpy=1.24.3
+  - pandas=2.0.3
+  - pip=23.2.1
+  - pillow=9.4.0
+  - python=3.11.5
+  - scikit-image=0.20.0
+  - scikit-learn=1.3.0
+  - scipy=1.11.1
+  - seaborn=0.12.2
+  - sqlalchemy=1.4.39
 
