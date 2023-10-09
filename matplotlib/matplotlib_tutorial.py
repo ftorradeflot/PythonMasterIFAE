@@ -479,11 +479,9 @@ plt.title("Inner Plot");
 #
 # Remove y-ticks.
 
-# <a id=other_stuff></a>
-# # Other stuff
+# # Other plot types
 
-# <a id=plot_image></a>
-# ##  Plot image
+# ##  Images
 
 n_rows = 2
 n_cols = 2
@@ -501,7 +499,7 @@ im = plt.imshow(np.sin(x) + np.cos(y), cmap='gist_heat') #, clim=(-0.5, 0.5)) #,
 plt.colorbar();
 # -
 
-# ## Shape plots
+# ## Shapes
 
 # +
 from matplotlib.patches import Circle, Ellipse, Rectangle, Polygon
@@ -593,7 +591,22 @@ ax.pie(pie_data, labels=pie_labels, colors=pie_colors)
 ax.axis('equal');
 # -
 
-# <a id=projections></a>
+# <a id=3d_plots></a>
+# ## 3D Plots
+
+# +
+import mpl_toolkits.mplot3d.axes3d as p3
+x = np.linspace(0, 2 * np.pi, 120)
+y = np.linspace(0, 2 * np.pi, 120).reshape(-1, 1)
+z = np.sin(x) + np.cos(y)
+
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+ax.plot_surface(x, y, z, cmap='viridis')
+# -
+
+# # Additional concepts
+#
 # ## Projections
 
 # +
@@ -716,21 +729,7 @@ ani_1 = animation.FuncAnimation(fig, anim_img.next_frame, frames=40, interval=50
 HTML(ani_1.to_html5_video())
 # -
 
-# <a id=3d_plots></a>
-# ## 3D Plots
-
-# +
-import mpl_toolkits.mplot3d.axes3d as p3
-x = np.linspace(0, 2 * np.pi, 120)
-y = np.linspace(0, 2 * np.pi, 120).reshape(-1, 1)
-z = np.sin(x) + np.cos(y)
-
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-ax.plot_surface(x, y, z, cmap='viridis')
-# -
-
-# # Other plotting libraries
+# # Alternative plotting libraries
 #
 # ## Seaborn
 #
