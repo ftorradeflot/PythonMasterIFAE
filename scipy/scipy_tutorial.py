@@ -53,16 +53,15 @@ const.epsilon_0
 # convert temperatures:
 const.convert_temperature(100, old_scale='C', new_scale='K')
 
-# +
 # more constants (including units and errors)!
-
+i = 0
 for k, v in const.physical_constants.items():
     print(k, ':', v)
+    i += 1
+    if i >= 20:
+        break
     
-# -
 
-
-const
 
 # +
 val, unit, uncertainty = const.physical_constants['muon mass energy equivalent in MeV']
@@ -71,6 +70,8 @@ val, unit, uncertainty
 # -
 
 # # Optimization
+#
+# Used for minimization / maximization of objective functions. Used also for root finding, curve fitting, etc.
 #
 # ## General least-squares fitting using `curve_fit`
 #
@@ -106,8 +107,6 @@ print('c = {:5.2f} ± {:.2f}'.format(params[2], uncertainties[2]))
 print('error: {}'.format(error))
 
 # -
-
-print(covariance_matrix)
 
 plt.plot(x, y, '.', label='data')
 plt.plot(x, g(x, *params), label='fit result')
@@ -205,10 +204,13 @@ print('\tb = {:5.2f}'.format(intercept))
 
 # -
 
-# <a id=exercise_1></a>
 # ## Exercise 1
 #
-# Use the `curve_fit` function to fit a quadratic polynomial function to the data, plot the result and compare the error with the previous fits.
+# Use the `curve_fit` function to fit a sinusoidal function to the data, plot the result and compare the error with the previous fits.
+#
+# $$
+# y = a \sin(x-b) + c
+# $$
 
 
 
@@ -299,12 +301,14 @@ plt.plot([r.x[0]], [r.x[1]], 'ro-')
 # +
 global min_path
 
-min_path = [(3., 0.)]
+min_path = [(0, 0.)]
 
 def store_path(x):
     min_path.append(x)
 
-r = minimize(g, x0=min_path[0], callback=store_path, tol=1e-20, method='CG',
+    
+# There are many optimization algorithms: CG, BFGS, COBYLA, etc
+r = minimize(g, x0=min_path[0], callback=store_path, tol=1e-20, method='BFGS',
              options={'gtol': 1e-10, 'maxiter':100, 'eps': 1e-9})
 
 plt.contourf(X, Y, Z, cmap='viridis_r')
@@ -328,7 +332,7 @@ x0_arr = np.vstack([X.reshape(-1), Y.reshape(-1)]).T
 
 # +
 def minimize_g(x):
-    return minimize(g, x0=x, method='CG').x
+    return minimize(g, x0=x, method='BFGS').x
 
 result = np.apply_along_axis(minimize_g, 1, x0_arr) # providing an initial guess is mandatory
 # -
@@ -428,9 +432,7 @@ print('Fit: λ = {:.2f} ± {:.2f}'.format(result.x[0], np.sqrt(result.hess_inv[0
 
 from scipy.stats import norm
 
-# + jupyter={"outputs_hidden": true}
 
-# -
 
 # # Fast Fourier Transforms (`fft` and `fftpack` )
 
@@ -1020,9 +1022,7 @@ print_result(app_p, alpha)
 #
 # **What is the expected profit of this product?**
 
-# + jupyter={"outputs_hidden": true}
 
-# -
 
 # <a id=spatial_functions></a>
 # # Spatial Functions
@@ -1227,15 +1227,11 @@ from scipy.stats import norm
 
 def gaussian(x, mu, sigma, A):
     return A * norm.pdf(x, mu, sigma)
-
-
 # -
 
 # Use a FFT to identify the two offending noise frequencies. Then convert the `lowpass_filter` above into a bandstop filter (hint: it is a trivial modification), and remove the offending noise from the data as much as possible (it won't be perfect). Finally, use `curvefit` to fit a Gaussian to the data, thereby recovering the original signal.
 
-# + jupyter={"outputs_hidden": true}
 
-# -
 
 # <a id=special_functions></a>
 # # Special Functions
