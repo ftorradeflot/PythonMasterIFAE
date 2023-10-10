@@ -60,7 +60,7 @@ for k, v in const.physical_constants.items():
     i += 1
     if i >= 20:
         break
-    
+
 
 
 # +
@@ -556,7 +556,7 @@ print('1000 points:', trapz(y, x))
 #
 # The motion of a projectile without drag
 #
-# $$\frac{d^{2}x}{dt^{2}} = g$$
+# $$\frac{d^{2}x}{dt^{2}} = a$$
 #
 # Rewritten as a system of 1st order equations and treating x, y coordinates independently
 #
@@ -570,8 +570,8 @@ print('1000 points:', trapz(y, x))
 # In this case we know the analytic solution
 #
 # $$
-# v = at + v_0 \\
-# x = \frac{1}{2}at^2 + v_0t + x_0
+# \vec{v} = \vec{a}t + \vec{v_0} \\
+# \vec{x} = \frac{1}{2}\vec{a}t^2 + \vec{v_0}t + \vec{x_0}
 # $$
 
 from scipy.integrate import solve_ivp
@@ -597,18 +597,18 @@ def motion_wo_drag(t, y_0):
 # Define initial conditions, 
 #
 # $$
-# x_0 = (0, 0) \\
-# v_0 = 3 (\cos(30^{\circ}), \sin(30^{\circ}))
+# \vec{x_0} = (x_{0,0}, x_{0,1}) \\
+# \vec{v_0} = |v_0| (\cos(\theta_0), \sin(\theta_0))
 # $$
 
 # +
 theta0_deg = 45 # deg
 v0_abs = 50 # m/s
+x0 = [0, 0]
 time_frame = [0, 5] 
 
 theta0 = np.deg2rad(theta0_deg)
 v0 = (v0_abs*np.cos(theta0), v0_abs*np.sin(theta0))
-x0 = [0, 0]
 y0 = npc([x0, v0])
 # -
 
