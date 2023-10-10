@@ -45,8 +45,6 @@ plt.rcParams['font.size'] = 16
 plt.rcParams['lines.linewidth'] = 2
 # -
 
-sp.__version__
-
 # # Physical constants
 
 import scipy.constants as const
@@ -566,16 +564,33 @@ print('1000 points:', trapz(y, x))
 # v_0' = 0 \\
 # v_1' = -g
 # $$
+#
+# In this case we know the analytic solution
+#
+# $$
+# v = at + v_0 \\
+# x = \frac{1}{2}at^2 + v_0t + x_0
+# $$
 
 from scipy.integrate import solve_ivp
 from numpy import concatenate as  npc
 
 
-def motion_wo_drag(t, y):
+# +
+def motion_wo_drag_ode(t, y):
     x = y[:2]
     v = y[2:]
     return npc((v, [0, -sp.constants.g]))
 
+def motion_wo_drag(t, y_0):
+    a = np.array([0, -sp.constants.g])
+    x_0 = np.array(y_0[:2])
+    v_0 = np.array(y_0[2:])
+
+    return npc((0.5*a*t**2 + v_0*t + x_0, a*t + v_0))
+
+
+# -
 
 # Define initial conditions, 
 #
@@ -587,6 +602,7 @@ def motion_wo_drag(t, y):
 # +
 theta0_deg = 45 # deg
 v0_abs = 50 # m/s
+time_frame = [0, 5] 
 
 theta0 = np.deg2rad(theta0_deg)
 v0 = (v0_abs*np.cos(theta0), v0_abs*np.sin(theta0))
@@ -594,18 +610,24 @@ x0 = [0, 0]
 y0 = npc([x0, v0])
 # -
 
-ode_solution = solve_ivp(motion_wo_drag, [0, 5], y0, max_step=0.5)
+ode_solution = solve_ivp(motion_wo_drag_ode, time_frame, y0)
 
 # +
 fig, ax = plt.subplots()
 
 v_fac = 1
 s = ode_solution.y
-ax.plot(s[0, :], s[1, :])
+t = ode_solution.t
+
+ax.plot(s[0, :], s[1, :], marker='o')
 
 for x, y, vx, vy in s.T:
     ax.arrow(x, y, v_fac*vx, v_fac*vy, width=0.01, head_width=3)
-    
+
+# plot vs analytical solution
+a_s = np.vstack([motion_wo_drag(tt, y0) for tt in np.linspace(*time_frame, 100)]).T
+ax.plot(a_s[0, :], a_s[1, :])
+
 ax.axis('equal');
 # -
 
