@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.13.6
+#       jupytext_version: 1.14.7
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -27,46 +27,14 @@
 # - Contains the CODATA values for many constants of nature
 # - Mostly build as wrappers around time-proven fortran libraries (fftpack, lapack, fitpack)
 
-# # Table of Contents
-#
-# 1. [Physical constants](#physical_constants)
-# 2. [Optimize](#optimize)
-#     * [General least-squares fitting using `curve_fit`](#curve_fit)
-#         - [Exercise 1](#exercise_1)
-#         - [Providing uncertainties and initial guesses](#uncertainties_guesses)
-#     * [Function minimization using `minimize`](#minimize)
-#         - [Unbinned likelihood fits](#likelihood)
-#         - [Exercise 2](#exercise_2)
-# 3. [Fast Fourier Transforms (FFTs)](#fft)
-# 4. [Integration](#integration)
-#     * [Function integration](#function_integration)
-#     * [Sample integration](#sample_integration)
-#         - [Exercise 3](#exercise_3)
-# 5. [Interpolation](#interpolation)
-#     * [Linear interpolation](#linear_interpolation)
-#     * [Cubic spline interpolation](#spline_interpolation)
-#     * [Exercise 4](#exercise_4)
-# 6. [Stats](#stats)
-#     * [Probability distributions](#stats_distributions)
-#         - [Continuous distributions](#continuous_distributions)
-#         - [Discrete distributions](#discrete_distributions)
-#         - [Multivariate distributions](#multivariate_distributions)
-#     * [Statistical functions](#statistical_functions)
-#     * [Example](#stats_example)
-#     * [Exercise 5](#exercise_5)
-# 7. [Special Functions](#special_functions)
-#     * [Signal filtering](#filtering)
-#         - [Exercise 6](#exercise_6)
-#     * [Bessel functions](#bessel)
-#     * [Error function and Gaussian CDF](#erf)
-#     * [Orthogonal Polynomials](#ortho_polys)
-#         - [Exercise 7](#exercise_7)
-
 # # Notebook Setup (run me first!)
 
-# + tags=[]
+# +
+from pathlib import Path
+
 import scipy as sp
 import numpy as np
+import pandas as pd
 
 # we will need to plot stuff later
 import matplotlib.pyplot as plt
@@ -76,6 +44,8 @@ plt.rcParams['figure.figsize'] = (12, 8)
 plt.rcParams['font.size'] = 16
 plt.rcParams['lines.linewidth'] = 2
 # -
+
+sp.__version__
 
 # <a id=physical_constants></a>
 # # Physical constants
@@ -290,7 +260,7 @@ plt.legend();
 
 # We define a function with two local minimums
 
-# + tags=[]
+# +
 MIN_1 = np.array([2, 1])
 MIN_2 = np.array([-2, 3])
 
@@ -301,7 +271,8 @@ def g(x):
     return -f(x, 1, MIN_1) - f(x, 2, MIN_2)
 
 
-# + tags=[]
+# -
+
 XLIM = [-5, 5]
 YLIM = [-2.5, 7.5]
 x = np.linspace(*XLIM, 100)
@@ -309,14 +280,12 @@ y = np.linspace(*YLIM, 100)
 X, Y = np.meshgrid(x, y)
 pos = np.dstack((X, Y))
 Z = g(pos)
-# -
 
 plt.contourf(X, Y, Z, cmap='viridis_r')
 plt.colorbar()
 
 # We will try to find the minimum
 
-# + tags=[]
 from scipy.optimize import minimize
 
 # +
@@ -352,27 +321,26 @@ r
 
 # Let's see where do different initial guesses lead to
 
-# + tags=[]
+# +
 x_range = np.linspace(-8, 8, 33)
 y_range = np.linspace(-4, 10, 29)
 
 X, Y = np.meshgrid(x_range, y_range)
+# -
 
-# + tags=[]
 x0_arr = np.vstack([X.reshape(-1), Y.reshape(-1)]).T
 
 
-# + tags=[]
+# +
 def minimize_g(x):
     return minimize(g, x0=x, method='CG').x
 
 result = np.apply_along_axis(minimize_g, 1, x0_arr) # providing an initial guess is mandatory
+# -
 
-# + tags=[]
 s1 = np.isclose(result, MIN_1)
 s2 = np.isclose(result, MIN_2)
 s3 = ~(np.logical_or(s1, s2))
-# -
 
 plt.plot(x0_arr[s1[:, 0], 0], x0_arr[s1[:, 0], 1], 'bo')
 plt.plot(x0_arr[s2[:, 0], 0], x0_arr[s2[:, 0], 1], 'ro')
@@ -472,7 +440,7 @@ from scipy.stats import norm
 # <a id=fft></a>
 # # Fast Fourier Transforms (FFTs)
 
-# + tags=[]
+# +
 freq1 = 5
 freq2 = 50
 
@@ -487,7 +455,6 @@ plt.scatter(t, noisy_y, s=10, alpha=0.25, lw=0)
 plt.plot(t, y, c='k')
 plt.xlabel(r'$t \ /\ \mathrm{s}$');
 
-# + tags=[]
 from scipy import fftpack
 
 # +
@@ -694,9 +661,7 @@ plt.grid(linestyle='--');
 #
 # For further details you can check [the official documentation](https://docs.scipy.org/doc/scipy/reference/stats.html)
 
-# + tags=[]
 from scipy import stats
-# -
 
 # <a id=stats_distributions></a>
 # ## Probability distributions
@@ -822,7 +787,6 @@ plt.tight_layout()
 # <a id=multivariate_distributions></a>
 # ### Multivariate distributions
 
-# + tags=[]
 # Initialize a multivariate normal distribution
 mult_mean = [0.1, 2.]
 mult_cov =  [[2.0, 0.3], [0.3, 0.5]]
@@ -869,23 +833,20 @@ fig.colorbar(h[3], ax=[ax1, ax2]);
 #
 # Used to determine if a sample comes from a normal distribution
 
-# + tags=[]
+# +
 x_sample = stats.norm().rvs(size=1000)
 
 alpha = 5e-2
+# -
 
-# + tags=[]
 x = np.linspace(-6, 6, 101)
 plt.hist(x_sample, bins=50, label='Sample data', density=True);
 plt.plot(x, stats.norm().pdf(x), label='N(0,1) pdf')
 plt.legend()
 
 
-# -
-
 # Normality test using `normaltest`: Tests if a sample comes from a normal distribution
 
-# + tags=[]
 def print_result(p, alpha):
     print("p = {:g}".format(p))
     if p < alpha:  # null hypothesis: x comes from a normal distribution
@@ -894,10 +855,8 @@ def print_result(p, alpha):
         print("The null hypothesis cannot be rejected")  
 
 
-# + tags=[]
 k2, p = stats.normaltest(x_sample)
 print_result(p, 5e-2)
-# -
 
 # Do the same with some additional noise
 
@@ -917,7 +876,7 @@ print_result(p, alpha)
 #
 # To test if a sample matches a distribution.
 
-# + tags=[]
+# +
 x_noisy = x_sample + x_noise
 l = x_noise.mean()
 s = x_noise.std(ddof=1)
@@ -935,24 +894,22 @@ print_result(p, alpha)
 # <a id=stats_example></a>
 # ## Example
 
-# + tags=[]
+# +
 import pandas as pd
 
 alpha = 1e-2
 df_prices = pd.read_csv('resources/stock.csv')
 df_prices.head(10)
+# -
 
-# + tags=[]
 _ = df_prices[['Apple', 'Microsoft']].plot(title='2016 stock prices', figsize=(6., 6.))
 
-# + tags=[]
 # Compute the daily relative increments
 df_incs = df_prices.drop('Date', axis=1)
 df_incs = ((df_incs - df_incs.shift(1))/df_incs.shift(1)).loc[1:, :]
 df_incs['Date'] = df_prices.Date
 df_incs.head(10)
 
-# + tags=[]
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12., 6.))
 _ = df_incs[['Apple', 'Microsoft']].plot(ax=ax1)
 _ = ax2.scatter(df_incs['Apple'], df_incs['Microsoft'])
@@ -960,24 +917,19 @@ ax2.grid()
 ax2.set_xlabel('Apple')
 ax2.set_ylabel('Microsoft')
 plt.tight_layout()
-# -
 
 # We can use the `fit` method to MLE of the mean and the std
 
-# + tags=[]
 # we can use the fit method to get the MLE of the mean and the std
 p = stats.norm.fit(df_incs.Apple)
 print(p)
 
-# + tags=[]
 # Create estimated distributions based on the sample
 app_dist = stats.norm(*p)
 
-# + tags=[]
 # We can test if this data fits a normal distribution (Kolmogorov-Smirnov test)
 app_K, app_p = stats.kstest(df_incs['Apple'], app_dist.cdf)
 print_result(app_p, alpha)
-# -
 
 # <a id=exercise_5></a>
 # ## Exercise 5
@@ -1006,13 +958,17 @@ print_result(app_p, alpha)
 
 # ## Delaunay triangulation
 
-from scipy.spatial import Delaunay
+# +
+from scipy.spatial import Delaunay, delaunay_plot_2d
+
 #points = np.array([[0, 0], [0, 1.1], [1, 0], [1, 1]])
 points = np.random.rand(6, 2)
 tri = Delaunay(points)
+# -
 
-plt.triplot(points[:,0], points[:,1], tri.simplices)
-plt.plot(points[:,0], points[:,1], 'o')
+delaunay_plot_2d(tri)
+#plt.triplot(points[:,0], points[:,1], tri.simplices)
+#plt.plot(points[:,0], points[:,1], 'o')
 for j, p in enumerate(points):
     plt.text(p[0]-0.03, p[1]+0.03, j, ha='right') # label the points
 for j, s in enumerate(tri.simplices):
@@ -1022,16 +978,68 @@ plt.xlim(-0.5, 1.5); plt.ylim(-0.5, 1.5)
 
 # ## Convex Hull
 
-# +
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, convex_hull_plot_2d
 points = np.random.rand(30, 2)   # 30 random points in 2-D
 hull = ConvexHull(points)
+convex_hull_plot_2d(hull);
 
-plt.plot(points[:,0], points[:,1], 'o')
-for simplex in hull.simplices:
-    plt.plot(points[simplex,0], points[simplex,1], 'k-')
-plt.show()
+# ## KDTree
+#
+# kd-tree for quick nearest-neighbor lookup
+
+points_file = Path('resources') / 'oss_2022g_mod.csv'
+df = pd.read_csv(points_file)
+df = df[(df.obs_type == 'WS') & ( df.dither_id == 0 )]
+
+df.plot.scatter(x='RA', y='Dec')
+ax = plt.gca()
+ax.invert_xaxis()
+
+from scipy.spatial import KDTree
+tree = KDTree(df[['RA', 'Dec']])
+
+new_points = np.array([[50, -60],[60, -61], [50, -50]]) 
+dists, inds = tree1.query(new_points, k=1)
+
+# +
+fig, ax = plt.subplots()
+df.plot.scatter(x='RA', y='Dec', ax=ax, label='survey')
+ax.scatter(*new_points.T, c='red', label='targets')
+
+df_neighbours = df.iloc[inds]
+ax.scatter(df_neighbours.RA, df_neighbours.Dec, s=50, c='black',
+           marker='x', label='nearest neighbours')
+ax.invert_xaxis()
+ax.legend()
 # -
+
+# KDTree only works with Minkowski distances, a generalization of the Euclidian distance.
+#
+# **This example is not correct, we should use the angular distance**
+#
+# scipy provides a list of distance metrics: `scipy.spatial.distance` but none of them provides the angular distance.
+
+# # Linear Algebra (`linalg`)
+#
+# Linear algebra functions.
+#
+# Overlaps `numpy` on the most common ones: inverse/det/norm of a matrix,
+# linear equations, eigenvalues, decompositions
+#
+# Contains other additional, more specific, methods.
+
+# ## LU decomposition
+
+# +
+from scipy.linalg import lu
+
+A = np.array([[2, 5, 8, 7], [5, 2, 2, 8], [7, 5, 6, 6], [5, 4, 4, 8]])
+p, l, u = lu(A)
+# -
+
+np.allclose(A, p @ l @ u)
+
+p, l, u
 
 # <a id=special_functions></a>
 # # Special Functions
@@ -1039,11 +1047,11 @@ plt.show()
 # A complete list of scipy special functions can be found [here](https://docs.scipy.org/doc/scipy-0.14.0/reference/special.html).
 
 # <a id=filtering></a>
-# # Signal filtering
+# ## Signal filtering
 
 # Consider this noisy data set with outliers. The data is a so-called S-curve, and we want to identify the midpoint of the falling edge.
 
-# + tags=[]
+# +
 from scipy.special import ndtr
 
 def s_curve(x, a, b):
@@ -1070,7 +1078,7 @@ print('Fit value:', params[1])
 
 # You can see clearly in the data that the mid-point of the S-curve is at about x=3 (which is the real value), but the outliers destroy the fit. We can remove them easily with a median filter. A median filter is particularly suited to edge detection cases, since it tends to preserve edges well.
 
-# + tags=[]
+# +
 from scipy.signal import medfilt
 
 filtered_y = medfilt(y)
@@ -1091,7 +1099,7 @@ plt.legend();
 
 # The following is an example implementation of a low-pass [Butterworth filter](https://en.wikipedia.org/wiki/Butterworth_filter):
 
-# + tags=[]
+# +
 from scipy.signal import butter, lfilter
 
 def lowpass_filter(data, cutoff, fs, order=5):
@@ -1113,17 +1121,15 @@ def lowpass_filter(data, cutoff, fs, order=5):
 
 # You are the unfortunate recipient of the following noisy data, which contains noise at two different (unknown) frequencies:
 
-# + tags=[]
 data = np.genfromtxt('resources/scipy_filter_data.dat')
 t = data[:, 0]
 y = data[:, 1]
 sample_freq = (len(t) - 1)/(t[-1])
 plt.plot(t, y);   # these are your data
-# -
 
 # Somewhere in this mess is a Gaussian:
 
-# + tags=[]
+# +
 from scipy.stats import norm
 
 def gaussian(x, mu, sigma, A):
@@ -1141,7 +1147,7 @@ def gaussian(x, mu, sigma, A):
 # <a id=bessel></a>
 # ## Bessel functions
 
-# + tags=[]
+# +
 from scipy.special import jn
 
 x = np.linspace(0, 10, 100)
@@ -1150,7 +1156,7 @@ for n in range(6):
 plt.grid()
 plt.legend();
 
-# + tags=[]
+# +
 import mpl_toolkits.mplot3d.axes3d as plt3d
 from matplotlib.colors import LogNorm
 
@@ -1188,7 +1194,7 @@ None
 # $$\mathrm{erf}(z) = \frac{2}{\sqrt{\pi}} \int_0^z \exp\left( -t^2 \right) dt $$
 # $$\mathrm{ndtr}(z) = \frac{1}{\sqrt{2\pi}} \int_{-\infty}^z \exp\left( \frac{-t^2}{2} \right) dt $$
 
-# + tags=[]
+# +
 from scipy.special import erf, ndtr
 
 def gaussian(z):
@@ -1205,7 +1211,7 @@ plt.legend(loc='best');
 # <a id=ortho_polys></a>
 # ## Orthogonal Polynomials
 
-# + tags=[]
+# +
 from scipy.special import eval_legendre, eval_laguerre, eval_hermite, eval_chebyt
 
 ortho_poly_dict = {'Legendre': eval_legendre,
@@ -1244,14 +1250,4 @@ plot_ortho_poly('Legendre')
 #
 # If you are struggling with the math, look [here](http://mathworld.wolfram.com/Fourier-LegendreSeries.html).
 
-# ## Additional information
-#
-# #### Fitting with (i)minuit
-#
-# One of the most extended minimization packages classically used for fitting is [MINUIT](https://en.wikipedia.org/wiki/MINUIT). Python allows to use this software via wrapping the C++ code into a python package named [iminuit](https://github.com/iminuit/iminuit).
-#
-# For more information see [iminuit documentation](http://iminuit.readthedocs.io/en/latest/), and the [available tutorials](https://github.com/iminuit/iminuit/blob/master/tutorial/tutorial.py) within the GitHub project.
-#
-#
-#
-#
+
