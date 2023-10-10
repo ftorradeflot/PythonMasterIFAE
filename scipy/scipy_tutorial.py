@@ -998,7 +998,7 @@ ax.invert_xaxis()
 from scipy.spatial import KDTree
 tree = KDTree(df[['RA', 'Dec']])
 
-new_points = np.array([[50, -60],[60, -61], [50, -50]]) 
+new_points = np.array([[50, -60],[61, -61], [50, -50]]) 
 dists, inds = tree1.query(new_points, k=1)
 
 # +
@@ -1018,6 +1018,30 @@ ax.legend()
 # **This example is not correct, we should use the angular distance**
 #
 # scipy provides a list of distance metrics: `scipy.spatial.distance` but none of them provides the angular distance.
+#
+# **HINT** We can solve this with `astropy`
+
+from astropy.coordinates import SkyCoord
+
+# +
+c_survey = SkyCoord(df.RA, df.Dec, unit='deg', frame='icrs')
+c_targets = SkyCoord(*new_points.T, unit='deg', frame='icrs')
+
+n_ids, n_angle, n_dist = c_targets.match_to_catalog_sky(c_survey)
+
+# +
+fig, ax = plt.subplots()
+df.plot.scatter(x='RA', y='Dec', ax=ax, label='survey')
+ax.scatter(*new_points.T, c='red', label='targets')
+
+df_neighbours = df.iloc[n_ids]
+ax.scatter(df_neighbours.RA, df_neighbours.Dec, s=50, c='black',
+           marker='x', label='nearest neighbours')
+ax.invert_xaxis()
+ax.legend()
+# -
+
+
 
 # # Linear Algebra (`linalg`)
 #
