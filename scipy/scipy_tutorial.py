@@ -552,6 +552,63 @@ print('1000 points:', trapz(y, x))
 #
 # **Hint** use the `np.cbrt` function
 
+# ## Ordinary differential equations (ODE)
+#
+# The motion of a projectile without drag
+#
+# $$\frac{d^{2}x}{dt^{2}} = g$$
+#
+# Rewritten as a system of 1st order equations and treating x, y coordinates independently
+#
+# $$
+# x_0' = v_0 \\ 
+# x_1' = v_1 \\
+# v_0' = 0 \\
+# v_1' = -g
+# $$
+
+from scipy.integrate import solve_ivp
+from numpy import concatenate as  npc
+
+
+def motion_wo_drag(t, y):
+    x = y[:2]
+    v = y[2:]
+    return npc((v, [0, -sp.constants.g]))
+
+
+# Define initial conditions, 
+#
+# $$
+# x_0 = (0, 0) \\
+# v_0 = 3 (\cos(30^{\circ}), \sin(30^{\circ}))
+# $$
+
+# +
+theta0_deg = 45 # deg
+v0_abs = 50 # m/s
+
+theta0 = np.deg2rad(theta0_deg)
+v0 = (v0_abs*np.cos(theta0), v0_abs*np.sin(theta0))
+x0 = [0, 0]
+y0 = npc([x0, v0])
+# -
+
+ode_solution = solve_ivp(motion_wo_drag, [0, 5], y0, max_step=0.5)
+
+# +
+fig, ax = plt.subplots()
+
+v_fac = 1
+s = ode_solution.y
+ax.plot(s[0, :], s[1, :])
+
+for x, y, vx, vy in s.T:
+    ax.arrow(x, y, v_fac*vx, v_fac*vy, width=0.01, head_width=3)
+    
+ax.axis('equal');
+# -
+
 # # Interpolation
 
 # <a id=linear_interpolation></a>
