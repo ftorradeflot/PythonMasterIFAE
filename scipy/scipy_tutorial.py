@@ -47,7 +47,6 @@ plt.rcParams['lines.linewidth'] = 2
 
 sp.__version__
 
-# <a id=physical_constants></a>
 # # Physical constants
 
 import scipy.constants as const
@@ -73,10 +72,8 @@ val, unit, uncertainty = const.physical_constants['muon mass energy equivalent i
 val, unit, uncertainty
 # -
 
-# <a id=optimize></a>
-# # Optimize
+# # Optimization
 #
-# <a id=curve_fit></a>
 # ## General least-squares fitting using `curve_fit`
 #
 # Non-linear least-squares with Levenberg-Marquardt numerical minimization.
@@ -437,8 +434,7 @@ from scipy.stats import norm
 
 # -
 
-# <a id=fft></a>
-# # Fast Fourier Transforms (FFTs)
+# # Fast Fourier Transforms (`fft` and `fftpack` )
 
 # +
 freq1 = 5
@@ -471,7 +467,6 @@ plt.xscale('log')
 # plt.yscale('log');
 # -
 
-# <a id=integration></a>
 # # Integration
 #
 # Scipy integration routines are discussed in the [Scipy documentation](https://docs.scipy.org/doc/scipy/reference/tutorial/integrate.html). We will look at the two most common routines here.
@@ -557,7 +552,6 @@ print('1000 points:', trapz(y, x))
 #
 # **Hint** use the `np.cbrt` function
 
-# <a id=interpolation></a>
 # # Interpolation
 
 # <a id=linear_interpolation></a>
@@ -1043,7 +1037,7 @@ ax.legend()
 
 
 
-# # Linear Algebra (`linalg`)
+# # Linear Algebra
 #
 # Linear algebra functions.
 #
@@ -1065,13 +1059,9 @@ np.allclose(A, p @ l @ u)
 
 p, l, u
 
-# <a id=special_functions></a>
-# # Special Functions
+# # Signal processing
 #
-# A complete list of scipy special functions can be found [here](https://docs.scipy.org/doc/scipy-0.14.0/reference/special.html).
-
-# <a id=filtering></a>
-# ## Signal filtering
+# ## Filtering
 
 # Consider this noisy data set with outliers. The data is a so-called S-curve, and we want to identify the midpoint of the falling edge.
 
@@ -1167,6 +1157,11 @@ def gaussian(x, mu, sigma, A):
 # + jupyter={"outputs_hidden": true}
 
 # -
+
+# <a id=special_functions></a>
+# # Special Functions
+#
+# A complete list of scipy special functions can be found [here](https://docs.scipy.org/doc/scipy-0.14.0/reference/special.html).
 
 # <a id=bessel></a>
 # ## Bessel functions
@@ -1273,5 +1268,13 @@ plot_ortho_poly('Legendre')
 # With $f(x) = sin(\pi x)$, write a function to calculate the coefficients $a_n$ of the Legendre series. Then plot $f(x)$ and the Legendre series for $x \in [-1, 1]$. Calculate as many coefficients as are needed for the series to essentially the same as $f(x)$ (it will be less than ten).
 #
 # If you are struggling with the math, look [here](http://mathworld.wolfram.com/Fourier-LegendreSeries.html).
+
+# # Other modules
+#
+# * `cluster` : clustering methods including K-means and hierachical clustering. Richer list of options in the `scikit-learn` module: https://scikit-learn.org/stable/modules/clustering.html
+# * `io` : Input/Output operations with some special file formats (e.g. Matlab, SPSS)
+# * `ndimage` : Most common methods for multidimensional image processing. It can be useful, but you will find higher level and richer functionalities in **OpenCV** and `scikit-image`
+# * `odr` : Orthogonal distance regression (?)
+# * `sparse`: Dealing with sparse matrices efficiently
 
 
