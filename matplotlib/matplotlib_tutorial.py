@@ -25,10 +25,10 @@
 
 # +
 # matplotlib inline plotting
-# # %matplotlib inline
+# %matplotlib inline
 
 # There's also a backend for interactive exploration
-# %matplotlib ipympl
+# #%matplotlib ipympl
 
 # +
 import matplotlib.pyplot as plt
@@ -697,6 +697,11 @@ plt.savefig(plot_folder / 'awesome_plot.jpg', dpi=300)
 
 # <a id=animations></a>
 # ## Animations
+#
+# To run the examples you may have to install ffmpeg
+
+# Uncomment the line below and run the cell
+# !pip install ffmpeg-python
 
 # +
 import matplotlib.animation as animation
@@ -805,6 +810,12 @@ fig.show()
 # Change the backend, restart the notebook and regenerate any of the previous plots
 #
 # The data in the plots can be dynamically updated.
+#
+# You may have to install `ipympl` if it is not already installed
+
+# +
+# To install ipympl uncomment the following line and run the cell
+# #!pip install ipympl
 
 # +
 # One can bound figure attributes to other widget values.
