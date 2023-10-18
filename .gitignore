@@ -1,6 +1,8 @@
 .*
 !.gitignore
 *.ipynb
+__pycache__
 
 # Tutorial specific files/folders
 matplotlib/plots
+resources/F_DR14_ZooSpec_10000.csv

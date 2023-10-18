@@ -7,11 +7,11 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.11.1
+#       jupytext_version: 1.14.7
 #   kernelspec:
-#     display_name: PythonBootcamp2021
+#     display_name: Python 3 (ipykernel)
 #     language: python
-#     name: pythonbootcamp2021
+#     name: python3
 # ---
 
 # # Scikit-Learn (sklearn)
@@ -114,7 +114,7 @@ def read_titanic():
 data = read_titanic()
 data
 
-# + slideshow={"slide_type": "subslide"} tags=[]
+# + slideshow={"slide_type": "subslide"}
 data.Survived.value_counts().plot.pie(autopct='%.2f %%')
 plt.gca().set_aspect('equal')
 
@@ -364,7 +364,7 @@ y = data['Survived_Code']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.6)
 
-reg = linear_model.LinearRegression(normalize=True)
+reg = linear_model.LinearRegression()
 reg.fit(X_train, y_train)
 
 print('''intercept = {}
@@ -440,7 +440,7 @@ ridge_v = []
 
 for alpha in alpha_range:
     # Lasso
-    reg = linear_model.Lasso(alpha=alpha, normalize=True)
+    reg = linear_model.Lasso(alpha=alpha)
     reg.fit(X_train, y_train)
 
     y_prediction = reg.predict(X_test)
@@ -450,7 +450,7 @@ for alpha in alpha_range:
                     np.linalg.norm(reg.coef_), np.isclose(reg.coef_, 0.).sum()])
 
     # Ridge
-    reg = linear_model.Ridge(alpha=alpha, normalize=True)
+    reg = linear_model.Ridge(alpha=alpha)
     reg.fit(X_train, y_train)
 
     y_prediction = reg.predict(X_test)
@@ -463,7 +463,7 @@ lasso_v = np.array(lasso_v)
 ridge_v = np.array(ridge_v)
     
 # Linear Regression
-reg = linear_model.LinearRegression(normalize=True)
+reg = linear_model.LinearRegression()
 reg.fit(X_train, y_train)
 y_prediction = reg.predict(X_test)
 y_prediction = np.where(y_prediction > 0.5, 1, 0)
@@ -544,8 +544,6 @@ plt.axis('off')
 None
 # -
 
-# #### The Support Vector Machine
-#
 # Again we minimze a loss function.
 #
 # $$
@@ -785,17 +783,18 @@ y = data['Survived']
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.5)
 
-df = pd.DataFrame()
+records = []
 ps = ParameterGrid({'max_depth':range(1, 20), 'criterion':['entropy', 'gini']})
 for d in ps:
     clf = DecisionTreeClassifier(max_depth=d['max_depth'], criterion=d['criterion'])
     clf.fit(X_train, y_train)
     acc = accuracy_score(y_test, clf.predict(X_test))
-    df = df.append({'max_depth': d['max_depth'], 'criterion': d['criterion'], 'accuracy': acc}, ignore_index=True)
-
-df = df.pivot('max_depth', 'criterion', 'accuracy')
-sns.heatmap(df, cmap='YlOrRd', annot=True, fmt='.3f')
-None
+    records.append({'max_depth': d['max_depth'],
+                    'criterion': d['criterion'],
+                    'accuracy': acc})
+df = pd.DataFrame.from_records(records)
+pivot_df = df.pivot(index='max_depth', columns='criterion', values='accuracy')
+sns.heatmap(pivot_df, cmap='YlOrRd', annot=True, fmt='.3f')
 
 # -
 
@@ -997,15 +996,16 @@ rf.fit(X_train, y_train)
 plots.plot_bars_and_confusion(truth=y_test, prediction=rf.predict(X_test))
 
 # +
-df = pd.DataFrame()
+records = []
 ps = ParameterGrid({'max_depth':range(1, 20), 'criterion':['entropy', 'gini']})
 for d in ps:
     rf = RandomForestClassifier(max_depth=d['max_depth'], criterion=d['criterion'])
     rf.fit(X_train, y_train)
     acc = accuracy_score(y_test, rf.predict(X_test))
-    df = df.append({'max_depth': d['max_depth'], 'criterion': d['criterion'], 'accuracy': acc}, ignore_index=True)
+    records.append({'max_depth': d['max_depth'], 'criterion': d['criterion'], 'accuracy': acc})
 
-df = df.pivot('max_depth', 'criterion', 'accuracy')
+df = pd.DataFrame.from_records(records)
+df = df.pivot(index='max_depth', columns='criterion', values='accuracy')
 sns.heatmap(df, cmap='YlOrRd', annot=True, fmt='.3f')
 # -
 
@@ -1089,7 +1089,7 @@ prediction = KMeans(n_clusters=3).fit_predict(X)
 # shift the colors
 prediction = (prediction + 2 ) % 3
 
-plt.scatter(X[:, 0], X[:, 1], facecolor='', edgecolors=cmap(prediction), lw=2,  s=380, label='prediction')
+plt.scatter(X[:, 0], X[:, 1], facecolor='w', edgecolors=cmap(prediction), lw=2,  s=380, label='prediction')
 plt.scatter(X[:, 0], X[:, 1], c=cmap(y), label='truth')
 plt.legend(loc='upper left')
 plt.axis('off')
@@ -1354,7 +1354,7 @@ data = read_titanic()
 X = data[['Sex_Code', 'Pclass_Code', 'Fare', 'Age']]
 y = data['Survived_Code']
 
-df = pd.DataFrame()
+records = []
 max_depths = range(1, 20)
 split_criterion = 'gini' # or 'entropy'
 
@@ -1362,15 +1362,17 @@ for d in max_depths:
     
     tree = DecisionTreeClassifier(max_depth=d, criterion=split_criterion)
     score = cross_validate(tree, X, y, cv=5)
-    df = df.append({'max_depth': d, 'model': 'Decision Tree', 'accuracy': score['test_score'].mean()},
-                   ignore_index=True)
+    records.append({'max_depth': d,
+                    'model': 'Decision Tree',
+                    'accuracy': score['test_score'].mean()})
     
     rf = RandomForestClassifier(max_depth=d, criterion=split_criterion)
     score = cross_validate(rf, X, y, cv=5)
-    df = df.append({'max_depth': d, 'model': 'Random Forest', 'accuracy': score['test_score'].mean()},
-                   ignore_index=True)
+    records.append({'max_depth': d, 'model': 'Random Forest',
+                    'accuracy': score['test_score'].mean()})
 
-df = df.pivot('max_depth', 'model', 'accuracy')
+df = pd.DataFrame.from_records(records)
+df = df.pivot(index='max_depth', columns='model', values='accuracy')
 sns.heatmap(df, cmap='YlOrRd', annot=True, fmt='.3f')
 # -
 
@@ -1515,6 +1517,8 @@ None
 #
 # See https://classeval.wordpress.com for some very good discussions on classifier evaluation.
 
+kk
+
 # +
 from sklearn.datasets import make_classification
 from sklearn.metrics import roc_curve
@@ -1649,6 +1653,11 @@ None
 # Where $ \mathbf {W}_{L} $ is a p x L matrix, and $\mathbf {T}_{L}$ is n x L.
 #
 # The principal components are sensitive to the scale of measurement, now to fix this issue we should always standardize variables before applying PCA. Applying PCA to your data set loses its meaning. If interpretability of the results is important for your analysis, PCA is not the right technique for your project.
+
+# Download the dataset for the following example from here: https://public.pic.es/s/TWRJVB39KbyxNqL/download
+# It is big > 600MB
+
+# !wget https://public.pic.es/s/TWRJVB39KbyxNqL/download -O resources/F_DR14_ZooSpec_10000.csv
 
 from ml import learning
 df_features = learning.read_features_file('resources/F_DR14_ZooSpec_10000.csv')
