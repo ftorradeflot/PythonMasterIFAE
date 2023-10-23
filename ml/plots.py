@@ -103,26 +103,32 @@ def draw_decission_surface(clf, predictions, label=None):
     plt.axis('off')
 
 
-def plot_bars_and_confusion(truth, prediction, axes=None, vmin=None, vmax=None):
+def plot_bars_and_confusion(truth, prediction, axes=None, vmin=None, vmax=None, perc=False):
     accuracy = accuracy_score(truth, prediction)
     cm = confusion_matrix(truth, prediction)
 
     if not axes:
         fig, axes = plt.subplots(1, 2, figsize=(10, 4))
 
+    (prediction == truth).value_counts().plot.barh(ax=axes[0])
+    axes[0].text(150, 0.5, 'Accuracy {:0.3f}'.format(accuracy))
+
+    if perc:
+        fmt = '.0%'
+        cm = cm/cm.sum()
+    else:
+        fmt = 'd'
+    
     if not vmin:
         vmin = cm.min()
 
     if not vmax:
         vmax = cm.max()
-
-    (prediction == truth).value_counts().plot.barh(ax=axes[0])
-    axes[0].text(150, 0.5, 'Accuracy {:0.3f}'.format(accuracy))
-
+    
     sns.heatmap(
         cm,
         annot=True,
-        fmt='d',
+        fmt=fmt,
         cmap='RdPu',
         xticklabels=['No', 'Yes'],
         yticklabels=['No', 'Yes'],

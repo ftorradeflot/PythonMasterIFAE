@@ -16,7 +16,7 @@ def read_features_file(features_file):
 def get_feat_target(df_features):
 
     X = df_features[['F{}'.format(i) for i in range(4096)]]
-    y = df_features['class']
+    y = df_features['target']
 
     return X, y
 

@@ -41,25 +41,40 @@ def plot_experiments():
     fig, axs = plt.subplots(2, 3, sharey=True, figsize=(15, 9))
     for i in range(2):
         for j in range(3):
+            
+            # select subsample
             idx = np.random.permutation(N)[:n]
             x_train, y_train = x[idx], y[idx]
 
+            # fit a polynomio for each degree
             w = []
             for d in d_arr:
                 w.append(np.polyfit(x_train, y_train, d))
-
-            axs[i, j].scatter(x_train, y_train)
-            axs[i, j].plot(x_range, f(x_range), 'r', linewidth=3.0)
+            
+            legend_handles = []
+            
+            # plot subsample
+            s = axs[i, j].scatter(x_train, y_train)
+            legend_handles.append(s)
+            
+            # plot function
+            ss, = axs[i, j].plot(x_range, f(x_range), 'r', linewidth=3.0)
+            legend_handles.append(ss)
+            
+            # plot the estimator function for each degree
             for k in range(len(w)):
-                axs[i, j].plot(x_range, f_hat(x_range, w[k]), colors[k], linewidth=3.0)
+                p, = axs[i, j].plot(x_range, f_hat(x_range, w[k]), colors[k], linewidth=3.0)
+                legend_handles.append(p)
 
+            # plot the test point at x=3.2
             axs[i, j].scatter(x_test, y_test, c='r')
             for k in range(len(w)):
                 axs[i, j].scatter(x_test, f_hat(x_test, w[k]), c=colors[k])
 
             axs[i, j].set_xlabel('x', size=12)
             axs[i, j].set_ylabel('y', size=12)
-            axs[i, j].legend([r'$f$', r'$\hat{f}$ (d = 1)', r'$\hat{f}$ (d = 2)', 
+            axs[i, j].legend(legend_handles,
+                             [r'$y$', r'$f$', r'$\hat{f}$ (d = 1)', r'$\hat{f}$ (d = 2)', 
                               r'$\hat{f}$ (d = 3)', r'$\hat{f}$ (d = 5)'], fontsize=12)
             axs[i, j].title.set_text('experiment {}'.format(cnt))
             cnt += 1
