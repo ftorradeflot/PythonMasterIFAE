@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.7
+#       jupytext_version: 1.16.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -31,6 +31,7 @@
 # #%matplotlib ipympl
 
 # +
+import os
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import HTML
@@ -41,6 +42,14 @@ plt.rcParams['figure.figsize'] = (10, 6)
 plt.rcParams['font.size'] = 16
 plt.rcParams['lines.linewidth'] = 2
 # -
+
+# Set the path to the git repository, it will be used later on to fetch data
+
+# if you cd'd to the repo folder before launching the jupyter lab server this should be fine
+path_to_the_repo = os.getcwd() 
+# Otherwise you'll have to set it manually
+#path_to_the_reop = "/whatever/path/you/cloned/the/repo/to"
+path_to_the_repo
 
 # <a id=line_plots></a>
 # # Line Plots
@@ -62,7 +71,7 @@ plt.plot(t, np.sin(t), '--');
 plt.plot(t, np.sin(t), 'go')
 # plt.plot(t, np.sin(t), color='green', marker='o', linestyle='');   # same thing!
 
-# new in matplotlib 2.0, all colors of the color rotation available as C<N>
+# All colors of the color rotation available as C<N>
 # Multiple lines in the same plot
 x = np.linspace(0, 1, 100)
 for n in range(9):
@@ -105,7 +114,7 @@ plt.xticks(
     horizontalalignment='right',  # or ha
     verticalalignment='top',      # or va
 );
-'''
+''';
 # -
 
 # <a id=histograms></a>
@@ -114,8 +123,7 @@ plt.xticks(
 # <a id=histogram_1d></a>
 # ## 1D
 
-# +
-# plt.hist?
+plt.hist
 
 # +
 sample_size = 100
@@ -181,7 +189,8 @@ plt.bar(centers, counts)
 # <a id=multiple_bar></a>
 # ## Multiple bar plot
 
-power_data = np.loadtxt('resources/power_sources.csv', delimiter=';', skiprows=1, usecols=range(1, 9))
+power_csv = os.path.join(path_to_the_repo, 'matplotlib', 'resources', 'power_sources.csv')
+power_data = np.loadtxt(power_csv, delimiter=';', skiprows=1, usecols=range(1, 9))
 power_headers = ['Hydroelectric',
  'Nuclear',
  'Coal',
@@ -209,7 +218,7 @@ plt.bar(np.arange(1, 13) + 1/4., power_data[:, 7], width=1/4., label=power_heade
 plt.xticks(np.arange(1, 13), power_labels, rotation=90)
 plt.title('% of total Power produced in Spain in 2017')
 plt.ylabel('%')
-plt.legend()
+plt.legend();
 
 # <a id=stacked_bar></a>
 # ## Stacked bar plot
@@ -277,6 +286,22 @@ plt.scatter(x1, y1, alpha=0.5)
 # * with a legend located at the 'upper left'
 #
 # **Hint:** Use the `np.cumsum` function to generate a random walk from a random sample.  
+
+# +
+# #%load -r 42-51 {path_to_the_repo}/matplotlib/matplotlib_solutions.ipynb
+# -
+
+# # %load -r 42-51 /home/torradeflot/Projects/PythonMasterIFAE/matplotlib/matplotlib_solutions.ipynb
+"rw_1 = np.cumsum(np.random.normal(size=100), axis=0)\n",
+"plt.plot(rw_1, '--k', label='Normal')\n",
+"\n",
+"rw_2 = np.cumsum(np.random.standard_t(5, size=100), axis=0)\n",
+"plt.plot(rw_2, ':ok', label='Students T')\n",
+"\n",
+"rw_3 = np.cumsum(np.random.uniform(low=-1., high=1., size=100), axis=0)\n",
+"plt.plot(rw_3, '-k', label='Uniform')\n",
+"\n",
+"plt.legend(loc='lower left')"
 
 # <a id=architecture></a>
 # # matplotlib architecture
