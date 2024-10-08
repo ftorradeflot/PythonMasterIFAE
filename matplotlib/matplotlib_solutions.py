@@ -52,31 +52,38 @@ plt.legend(loc='upper left')
 # <a id=exercise_2></a>
 # ## Exercise 2
 #
-# Generate 3 differents random samples.
+# Pick 3 differents energy sources.
 #
-# Plot them as normalized 1D histograms in a figure with 3 axes in 1 column, with shared x-axis and y-axis.
+# Plot the daily energy generated from each source as normalized 1D histograms in a figure with 3 axes in 1 column, with shared x-axis and y-axis.
 #
-# Put the name of the distribution somewhere in the axes so it can be identified.
+# Put the name of the energy source somewhere in the axes so it can be identified.
 #
 # There have to be no x-ticks in the top 2 axes and no vertical space between them.
 #
 # Remove y-ticks.
 
-# +
-s1 = np.random.normal(size=100)
-s2 = np.random.uniform(size=100)
-s3 = np.random.exponential(size=100)
+import os
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+daily_csv = os.path.join(os.getcwd(), 'resources', 'power_sources_daily_2014_2023.csv')
+df_daily = pd.read_csv(daily_csv, index_col=0)
 
-bins = np.linspace(-3, 5, 30)
+# +
+s1 = df_daily['Wind']
+s2 = df_daily['Nuclear']
+s3 = df_daily['Coal']
+
+bins = np.linspace(0, 400000, 101)
 
 fig, ((ax1), (ax2), (ax3)) = plt.subplots(3, 1, sharex=True, sharey=True, gridspec_kw={'hspace':0})
 ax1.hist(s1, color='0.4', bins=bins, density=True)
 ax2.hist(s2, color='0.4', bins=bins, density=True)
 ax3.hist(s3, color='0.4', bins=bins, density=True)
 
-ax1.text(0.05, 0.9,'Normal', ha='left', va='top', transform=ax1.transAxes)
-ax2.text(0.05, 0.9,'Uniform', ha='left', va='top', transform=ax2.transAxes)
-ax3.text(0.05, 0.9,'Exponential', ha='left', va='top', transform=ax3.transAxes)
+ax1.text(0.05, 0.9,'Wind', ha='left', va='top', transform=ax1.transAxes)
+ax2.text(0.05, 0.9,'Nuclear', ha='left', va='top', transform=ax2.transAxes)
+ax3.text(0.05, 0.9,'Coal', ha='left', va='top', transform=ax3.transAxes)
 for ax in fig.get_axes():
     ax.set_yticks([])
 # -

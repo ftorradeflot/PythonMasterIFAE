@@ -28,14 +28,18 @@
 # %matplotlib inline
 
 # There's also a backend for interactive exploration
-# #%matplotlib ipympl
+# #%matplotlib widget
 
 # +
+import math
 import os
-import matplotlib.pyplot as plt
-import numpy as np
-from IPython.display import HTML
 from pathlib import Path
+import random
+
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+from IPython.display import HTML
 
 # Make the size and fonts larger for this presentation
 plt.rcParams['figure.figsize'] = (10, 6)
@@ -48,17 +52,66 @@ plt.rcParams['lines.linewidth'] = 2
 # if you cd'd to the repo folder before launching the jupyter lab server this should be fine
 path_to_the_repo = os.getcwd() 
 # Otherwise you'll have to set it manually
-#path_to_the_reop = "/whatever/path/you/cloned/the/repo/to"
-path_to_the_repo
+#path_to_the_repo = "/whatever/path/you/cloned/the/repo/to"
+
+# # Auxiliary data
+#
+# ## Spain power generation data 
+#
+# Data from Red Eléctrica, retrieved from the public [REData API] (https://www.ree.es/es/apidatos).
+#
+# See [this notebook](../resources/PowerSources.ipynb) for the details
+
+# ### Daily data 2014-2023
+#
+# in kWh
+
+daily_csv = os.path.join(path_to_the_repo, 'resources', 'power_sources_daily_2014_2023.csv')
+df_daily = pd.read_csv(daily_csv, index_col=0)
+df_daily.fillna(0, inplace=True)
+df_daily.shape
+
+df_daily.head(5)
+
+# ### Monthly data 2014-2023
+#
+# in kwH
+
+df_monthly = df_daily.groupby(['year', 'month'], as_index=False).sum().drop('day', axis=1)
+
+df_monthly.head(5)
+
+# ### Renewable vs non-Renewable
+
+renewable = [
+    'Hydro',
+    'Hydroeolian',
+    'Wind',
+    'SolarPhotovoltaic',
+    'ThermalSolar',
+    'OtherRenewables',
+    'RenewableWaste'
+]
+non_renewable = [
+    'PumpedStorage',
+    'Nuclear',
+    'Coal',
+    'FuelGas',
+    'DieselEngines',
+    'GasTurbine',
+    'SteamTurbine',
+    'CombinedCycle',
+    'Cogeneration',
+    'NonRenewableWaste'
+]
 
 # <a id=line_plots></a>
 # # Line Plots
 
-# +
-x = np.linspace(0, 1, 101) # 101 numbers from 0 to 1
-
+x = np.linspace(0, 100, 101)
 plt.plot(x, x**2)
-# -
+
+plt.plot(range(df_daily.shape[0]), df_daily['SolarPhotovoltaic'])
 
 # <a id=different_styles></a>
 # ## Using different styles for plots
@@ -82,15 +135,16 @@ for n in range(9):
 #
 
 months = range(1, 13)
-min_temp = np.array([-30.6, -34.3, -26.7, -11.7, -6.1, 1.1, 3.9, 3.3, -2.1, -8.2, -18.2, -22.8])
-max_temp = np.array([21.7, 19.4, 31.7, 30.6, 36.7, 40.6, 40.6, 37.2, 37.2, 32.8, 26.1, 20.0])
+mask_2023 = df_monthly.year == 2023
+nuclear = df_monthly[ mask_2023]['Nuclear']
+hydro = df_monthly[ mask_2023]['Hydro']
 
 # +
-plt.plot(months, min_temp)#, c='0.2')
-plt.plot(months, max_temp)#, color='0.2')
-#plt.ylabel('$^\circ$C')
+plt.plot(months, hydro)#, c='0.2')
+plt.plot(months, nuclear)#, color='0.2')
+#plt.ylabel('Energy generation $MWh$')
 
-#plt.fill_between(months, min_temp, max_temp, color='lightgray')
+#plt.fill_between(months, hydro, nuclear, color='lightgray')
 #plt.grid(linestyle='--')
 '''
 month_names = ['January',
@@ -117,13 +171,34 @@ plt.xticks(
 ''';
 # -
 
+# <a id=exercise_1></a>
+# # Exercise 1
+#
+# Generate a line plot with the daily data from 2023 of 3 energy sources
+#
+# With these characteristics:
+# * All lines in grey tones
+# * different markers or line types for each line
+# * with a legend located at the 'upper left'
+#
+
+# +
+# #%load -r 44-49 {path_to_the_repo}/matplotlib/matplotlib_solutions.py
+# -
+
 # <a id=histograms></a>
 # # Histograms
 
 # <a id=histogram_1d></a>
 # ## 1D
 
-plt.hist
+# +
+# plt.hist?
+# -
+
+# The daily photovoltaic solar generation
+
+phot_counts, phot_bins, _ = plt.hist(df_daily['SolarPhotovoltaic']/1e3)
 
 # +
 sample_size = 100
@@ -146,6 +221,8 @@ counts, bins, _ = plt.hist(normal_sample, bins=20, label='Random sample')
 #plt.legend(loc=(0.2, 0.2))
 # -
 
+#
+
 # <a id=histogram_2d></a>
 # ## 2D
 
@@ -153,17 +230,14 @@ counts, bins, _ = plt.hist(normal_sample, bins=20, label='Random sample')
 # plt.hist2d?
 
 # +
-mean = [2, 1]
-cov = [[9, 2],
-       [2, 4]]
-
-x, y = np.random.multivariate_normal(mean, cov, size=10000).T
+x = df_daily['SolarPhotovoltaic']
+y = df_daily['ThermalSolar']
 
 hist_output = plt.hist2d(x, y, bins=50, cmap='gist_heat') # try different color maps: viridis(default), inferno, gist_heat
 #plt.hist2d(x, y, bins=50)
 # plt.hist2d(x, y, bins=[25, 50], range=[[-10, 14], [-5, 7]])
 
-plt.colorbar(label='Counts'); 
+plt.colorbar(label='Counts');
 # -
 
 # <a id=bar></a>
@@ -177,28 +251,18 @@ plt.colorbar(label='Counts');
 
 # +
 # Reusing the data from the 1D histogram
-centers = (bins[:-1] + bins[1:])/2.
-plt.bar(centers, counts)
+centers = (phot_bins[:-1] + phot_bins[1:])/2.
+plt.bar(centers, phot_counts)
 
 # Not exactly the plot we had previously
 # We have to set the width of the bar to the width of the bin
-#bin_width = bins[1:] - bins[:-1]
-#plt.bar(centers, counts, bin_width)
+#bin_width = phot_bins[1:] - phot_bins[:-1]
+#plt.bar(centers, phot_counts, bin_width)
 # -
 
 # <a id=multiple_bar></a>
 # ## Multiple bar plot
 
-power_csv = os.path.join(path_to_the_repo, 'matplotlib', 'resources', 'power_sources.csv')
-power_data = np.loadtxt(power_csv, delimiter=';', skiprows=1, usecols=range(1, 9))
-power_headers = ['Hydroelectric',
- 'Nuclear',
- 'Coal',
- 'Combined Cycle',
- 'Wind',
- 'Thermal',
- 'Other non renewable',
- 'Other renewable']
 power_labels = ['January',
  'February',
  'March',
@@ -212,23 +276,33 @@ power_labels = ['January',
  'November',
  'December']
 
-plt.bar(np.arange(1, 13) - 1/4., power_data[:, 0], width=1/4., label=power_headers[0])
-plt.bar(np.arange(1, 13), power_data[:, 4], width=1/4., label=power_headers[4])
-plt.bar(np.arange(1, 13) + 1/4., power_data[:, 7], width=1/4., label=power_headers[7])
+year = 2023
+mask_year = df_monthly.year == year
+sources_list = ['Hydro', 'Wind', 'SolarPhotovoltaic']
+n_sources = len(sources_list)
+for ind, source in enumerate(sources_list):
+    plt.bar(np.arange(1, 13) + (ind - 1)/(n_sources + 1),
+            df_monthly[mask_year][source]/1000,
+            width=1/(n_sources + 1),
+            label=source)
 plt.xticks(np.arange(1, 13), power_labels, rotation=90)
-plt.title('% of total Power produced in Spain in 2017')
-plt.ylabel('%')
+plt.title(f'Total Power produced in Spain in {year}')
+plt.ylabel('MWh')
 plt.legend();
 
 # <a id=stacked_bar></a>
 # ## Stacked bar plot
 
 # +
-renewable = power_data[:, [0, 4, 7]].sum(axis=1) # Hydroelectric + Wind + Other renewable'
-non_renewable = power_data[:, [1, 2, 3, 5, 6]].sum(axis=1) # Nuclear + Coal + Combined Cycle + Thermal + Other non renewable
+year = 2023
+year_mask = df_monthly.year == year
 
-plt.bar(range(1, 13), renewable, label='Renewable')
-plt.bar(range(1, 13), non_renewable, bottom=renewable, label='Non renewable')
+total_df = df_monthly.loc[year_mask, renewable + non_renewable].sum(axis=1)
+renewable_df = 100*df_monthly.loc[year_mask, renewable].sum(axis=1)/total_df
+non_renewable_df = 100*df_monthly.loc[year_mask, non_renewable].sum(axis=1)/total_df
+
+plt.bar(range(1, 13), renewable_df, label='Renewable')
+plt.bar(range(1, 13), non_renewable_df, bottom=renewable_df, label='Non renewable')
 
 plt.xticks(range(1, 13), power_labels, rotation=45, ha='right')
 plt.hlines(50, 0, 13, colors='k')
@@ -247,11 +321,11 @@ plt.legend()
 x1, y1, z1 = np.random.multivariate_normal([1, 1, 0], [[1, 0, 0], [0, 1, 0], [0, 0, 10]], 1000).T
 
 # raw plot
-plt.scatter(x1, y1, alpha=0.5)
+#plt.scatter(x1, y1) #, alpha=0.5)
 
 # Coloured
-#plt.scatter(x1, y1, c=z1, cmap='winter')
-#plt.colorbar()
+plt.scatter(x1, y1, c=z1, cmap='winter')
+plt.colorbar()
 
 # With sizes
 #plt.scatter(x1, y1, s=5*(z1 - min(z1)), alpha=0.5)
@@ -275,33 +349,10 @@ plt.scatter(x1, y1, alpha=0.5)
 
 # -
 
-# <a id=exercise_1></a>
-# # Exercise 1
-#
-# Generate a line plot with the data of 3 random walks, corresponding to different random distributions.
-#
-# With these characteristics:
-# * All lines in grey tones
-# * different markers or line types for each line
-# * with a legend located at the 'upper left'
-#
-# **Hint:** Use the `np.cumsum` function to generate a random walk from a random sample.  
+# We can use the scatter plot to analyze energy generation data
 
-# +
-# #%load -r 42-51 {path_to_the_repo}/matplotlib/matplotlib_solutions.ipynb
-# -
-
-# # %load -r 42-51 /home/torradeflot/Projects/PythonMasterIFAE/matplotlib/matplotlib_solutions.ipynb
-"rw_1 = np.cumsum(np.random.normal(size=100), axis=0)\n",
-"plt.plot(rw_1, '--k', label='Normal')\n",
-"\n",
-"rw_2 = np.cumsum(np.random.standard_t(5, size=100), axis=0)\n",
-"plt.plot(rw_2, ':ok', label='Students T')\n",
-"\n",
-"rw_3 = np.cumsum(np.random.uniform(low=-1., high=1., size=100), axis=0)\n",
-"plt.plot(rw_3, '-k', label='Uniform')\n",
-"\n",
-"plt.legend(loc='lower left')"
+plt.scatter(df_daily['Wind'], df_daily['Hydro'])
+plt.scatter(df_daily['SolarPhotovoltaic'], df_daily['ThermalSolar'])
 
 # <a id=architecture></a>
 # # matplotlib architecture
@@ -399,15 +450,20 @@ print('But are they the same instance? {}'.format(fig == new_fig))
 # # Multiple plots in the same figure
 
 # +
-x = np.linspace(0, 3.)
+sources_sample = random.sample(renewable + non_renewable, 9)
 
 # subplot arguments: # of rows, # of columns, plot index (row * (#cols) + col)
 for i in range(9):
     ax = plt.subplot(3, 3, i + 1) # the same as fig.add_subplot
-    ax.plot(x, x**i)
-    ax.set_xlim(0, 3)
+    x = df_monthly[sources_sample[i]]
+    ax.plot(x)
+    x_center = np.array(ax.get_xlim()).sum()/2
     y_center = np.array(ax.get_ylim()).sum()/2.
-    ax.text(1.5, y_center, str(i + 1), ha='center', va='center', fontsize=32)
+    ax.text(x_center, y_center, sources_sample[i], ha='center', va='center', fontsize=12)
+
+    # Remove the ticks for cleaner plotting
+    ax.set_xticks([])
+    ax.set_yticks([])
 
 plt.tight_layout() # When doing multiple plots you should almost always use this command
 
@@ -419,7 +475,7 @@ plt.tight_layout() # When doing multiple plots you should almost always use this
 
 # +
 def poisson(x, k):
-    return np.exp(-x)*x**k / np.math.factorial(k)
+    return np.exp(-x)*x**k / math.factorial(k)
 
 x = np.linspace(0, 12, 40)
 y = poisson(x, 2)
@@ -460,9 +516,9 @@ top_histogram = fig.add_subplot(gspec[0, 1:])
 side_histogram = fig.add_subplot(gspec[1:, 0])
 lower_right = fig.add_subplot(gspec[1:, 1:])
 
-# We produce two sets of random data
-Y = np.random.normal(loc=0.0, scale=1.0, size=10000)
-X = np.random.random(size=10000)
+# Data from daily energy generation
+X = df_daily['Wind']
+Y = df_daily['SolarPhotovoltaic']
 
 # Normed histograms counts add up to 1, they resemble a probability density function
 top_histogram.hist(X, bins=100, density=True)
@@ -482,6 +538,8 @@ lower_right.scatter(X, Y, alpha=0.5)
 # ## Inset Plots (plot inside a plot)
 
 # +
+x = np.linspace(0, 100, 101)
+
 plt.plot(x, x**2)
 plt.title("Outer Plot")
 
@@ -503,6 +561,29 @@ plt.title("Inner Plot");
 # There have to be no x-ticks in the top 2 axes and no vertical space between them.
 #
 # Remove y-ticks.
+
+# +
+# #%load -r 73-88 {path_to_the_repo}/matplotlib/matplotlib_solutions.py
+
+# +
+# # %load -r 73-88 /home/torradeflot/Projects/PythonMasterIFAE/matplotlib/matplotlib_solutions.py
+s1 = df_daily['Wind']
+s2 = df_daily['Nuclear']
+s3 = df_daily['Coal']
+
+bins = np.linspace(0, 400000, 101)
+
+fig, ((ax1), (ax2), (ax3)) = plt.subplots(3, 1, sharex=True, sharey=True, gridspec_kw={'hspace':0})
+ax1.hist(s1, color='0.4', bins=bins, density=True)
+ax2.hist(s2, color='0.4', bins=bins, density=True)
+ax3.hist(s3, color='0.4', bins=bins, density=True)
+
+ax1.text(0.05, 0.9,'Wind', ha='left', va='top', transform=ax1.transAxes)
+ax2.text(0.05, 0.9,'Nuclear', ha='left', va='top', transform=ax2.transAxes)
+ax3.text(0.05, 0.9,'Coal', ha='left', va='top', transform=ax3.transAxes)
+for ax in fig.get_axes():
+    ax.set_yticks([])
+# -
 
 # # Other plot types
 
@@ -605,14 +686,33 @@ plt.boxplot([s1, s2, s3], labels=['Normal', 'Uniform', 'Exponential']);
 # ## Pie charts
 
 # +
-pie_order = [0, 4, 7, 1, 2, 3, 5, 6]
-pie_data = power_data[11, pie_order]
-pie_labels = [power_headers[i] for i in pie_order]
-pie_colors = [(0, (i + 3)/5., 0, 0.7) for i in range(3)] + \
-    [((i + 3)/7., 0, 0, 0.7) for i in range(5)] #RGB color specification
+# Select data from a specific year and add it up
+year = 2023
+year_mask = df_daily.year == year
+dropped_columns = ['year', 'month', 'day', 'TotalGeneration']
+totals_year = (df_daily[year_mask].sum().drop(dropped_columns)/1000)
+
+# Get sorted renewable sources totals
+totals_renewable_all = totals_year[renewable].sort_values(ascending=False)
+totals_renewable = totals_renewable_all[:3]
+totals_renewable['OtherRenewables'] = totals_renewable_all[3:].sum()
+
+# Get sorted non-renewable sources totals
+totals_nonrenewable_all = totals_year[non_renewable].sort_values(ascending=False)
+totals_nonrenewable = totals_nonrenewable_all[:3]
+totals_nonrenewable['OtherNonRenewables'] = totals_nonrenewable_all[3:].sum()
+
+# Concatenate renewable and non renewable
+totals_summary = pd.concat([totals_renewable, totals_nonrenewable])
+totals_summary
+
+# +
+# Custom colors: renewable=green, non-renewable=red
+pie_colors = [(0, (i + 3)/7., 0, 0.7) for i in range(4)] + \
+    [((i + 3)/7., 0, 0, 0.7) for i in range(4)] #RGB color specification
 
 fig, ax = plt.subplots()
-ax.pie(pie_data, labels=pie_labels, colors=pie_colors)
+ax.pie(totals_summary, labels=totals_summary.index, colors=pie_colors)
 ax.axis('equal');
 # -
 
@@ -647,7 +747,8 @@ fig = plt.figure(figsize=(16, 8))
 ax1 = fig.add_subplot(gs[0], projection='polar')
 ax1.plot(theta, r)
 
-gaia_data = np.loadtxt('resources/GaiaDR2.csv', delimiter=',', skiprows=11)
+gaia_csv = os.path.join(path_to_the_repo, 'resources', 'GaiaDR2.csv')
+gaia_data = np.loadtxt(gaia_csv, delimiter=',', skiprows=11)
 ax2 = fig.add_subplot(gs[1:], projection='mollweide')
 ax2.scatter(np.deg2rad(gaia_data[:, 0]), np.deg2rad(gaia_data[:, 1]), alpha=0.3)
 ax2.grid()
@@ -687,7 +788,7 @@ def plot_stuff():
     z = stats.multivariate_normal([0.1, 0.3], [[0.2, 0.3], [0.1, 0.4]])
     plt.contourf(x, y, z.pdf(pos))
 
-for plot_style in ['classic', 'bmh', 'fivethirtyeight', 'ggplot', 'seaborn']:
+for plot_style in ['classic', 'bmh', 'fivethirtyeight', 'ggplot', 'seaborn-v0_8']:
     plt.figure()
     with plt.style.context(plot_style):   # use context manager so that changes are temporary
         plot_stuff()
@@ -810,7 +911,7 @@ TOOLS="hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom,undo,redo,reset,
 
 p = figure(tools=TOOLS)
 
-p.scatter(x, y, radius=radii,
+p.circle(x, y, radius=radii,
           fill_color=colors, fill_alpha=0.6,
           line_color=None)
 
@@ -841,6 +942,9 @@ fig.show()
 # +
 # To install ipympl uncomment the following line and run the cell
 # #!pip install ipympl
+# -
+
+
 
 # +
 # One can bound figure attributes to other widget values.
@@ -901,8 +1005,8 @@ AppLayout(
 #
 # Put everything in a single figure mith multiple axes
 
-from astropy.io import fits
-
-hdul = fits.open('resources/nip.fits')
+# +
+# # %load -r 110-135 /home/torradeflot/Projects/PythonMasterIFAE/matplotlib/matplotlib_solutions.py
+# -
 
 

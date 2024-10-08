@@ -7,9 +7,9 @@ dependencies:
   - bokeh=3.4.1
   - ffmpeg=7.1.0
   - ipympl=0.9.4
-  - ipywidgets=7.8.1
+  - ipywidgets=8.1.5
   - jupyterlab=4.0.11
-  - jupyterlab_widgets=1.0.0
+  - jupyterlab_widgets=3.0.13
   - jupytext=1.16.4
   - matplotlib=3.8.4
   - nodejs=22.9.0
