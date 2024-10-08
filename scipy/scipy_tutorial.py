@@ -116,6 +116,73 @@ plt.plot(x, y, '.', label='data')
 plt.plot(x, g(x, *params), label='fit result')
 plt.legend();
 
+# ### Example: Solar Photovoltaic generation data
+
+daily_csv = os.path.join(path_to_the_repo, 'resources', 'power_sources_daily_2014_2023.csv')
+df_daily = pd.read_csv(daily_csv, index_col=0)
+df_daily.fillna(0, inplace=True)
+
+plt.plot(x, df_daily['SolarPhotovoltaic'])
+
+
+# +
+def f(x, a, b, c):
+    return a*x**2 + b*x + c
+year_mask = df_daily.year >= 2019
+y = df_daily['SolarPhotovoltaic'][year_mask]
+x = np.arange(len(y))
+
+params, covariance_matrix = curve_fit(f, x, y)
+print(params)
+
+
+# -
+
+plt.plot(x, y)
+plt.plot(x, f(x, *params))
+
+residual = y - f(x, *params)
+plt.plot(x, residual)
+
+
+# +
+def g(x, a, b, c, d):
+    return a + b*x*np.sin(c + d*x)
+params2, covariance_matrix2 = curve_fit(g, x, residual, p0=[0, 1, 0, 2*np.pi/365])
+
+plt.plot(x, residual)
+plt.plot(x, g(x, *params2))
+
+# +
+gridspec = {
+    'height_ratios': [2, 1],
+    'hspace': 0,
+}
+fig, (ax1, ax2) = plt.subplots(2, sharex=True, gridspec_kw=gridspec)
+
+x2 = np.arange(len(y) + 365)
+
+ax1.plot(x, y/1000, markersize=2, c='black', marker='o', linestyle='')
+ax1.plot(x2, (f(x2, *params) + g(x2, *params2))/1000, c='tab:red', linewidth=2)
+ax1.set_ylabel('Energy (GWH)')
+ax1.set_yticks(ax1.get_yticks()[1:])    # remove bottom y-tick
+
+ax2.plot(x, (y - f(x, *params) - g(x, *params2))/1000,
+         markersize=2, c='black', marker='o', linestyle='')
+ax2.axhline(y=0, color='black', linestyle='--', linewidth=1)
+#ax2.set_xlabel('Energy')
+ax2.set_ylim(-70, 50)
+ax2.set_ylabel('Residuals')
+ax2.set_yticks([-25, 0, 25])
+ax2.set_xticks(np.arange(365.25/2, 365.25*6 + 1, 365.25))
+ax2.set_xticklabels([str(i) for i in range(2019, 2025)])
+for i in np.arange(0, 365.25*6 + 1, 365.25):
+    ax2.axvline(i, c='lightgrey')
+    ax1.axvline(i, c='lightgrey')
+
+fig.suptitle('Daily Photovoltaic Energy Production in Spain >= 2019')
+# -
+
 # ## Non-linear least squares with boundaries: `least_squares`
 
 # We can achieve the same result with the `least_squares` method that allows also constrained optimization.
@@ -221,7 +288,7 @@ print('\tb = {:5.2f}'.format(intercept))
 # -
 
 # <a id=uncertainties_guesses></a>
-# ### Providing uncertainties and initial guesses
+# ## Providing uncertainties and initial guesses
 
 # +
 x = np.linspace(0, 1, 1000)
@@ -354,7 +421,7 @@ plt.scatter(*MIN_1, s=200, facecolors='None', ec='k', lw=5)
 plt.scatter(*MIN_2, s=200, facecolors='None', ec='k', lw=5)
 
 # <a id=likelihood></a>
-# ### Unbinned likelihood fits
+# ### Example: Unbinned likelihood fits
 #
 # Example: an unbinned negative log-likelihood fit for a poissonian distribution
 
@@ -416,7 +483,7 @@ print('Fit: λ = {:.2f} ± {:.2f}'.format(result.x[0], np.sqrt(result.hess_inv[0
 # * It is worth to write down you problems and simplify the (log)Likelihood as much as possible
 
 # <a id=exercise_2></a>
-# ### Exercise 2
+# ## Exercise 2
 #
 # Do the same to estimate the parameters of a gaussian distribution.
 #
@@ -539,7 +606,7 @@ print('1000 points:', trapezoid(y, x))
 # -
 
 # <a id=exercise_3></a>
-# ### Exercise 3
+# ## Exercise 3
 #
 # Apply the `trapezoid` function to calculate:
 #
@@ -981,7 +1048,7 @@ print_result(p, alpha)
 # See [the docs](https://docs.scipy.org/doc/scipy/reference/stats.html)
 
 # <a id=stats_example></a>
-# ## Example
+# ### Example: Normality test on stock data
 
 # +
 import pandas as pd
