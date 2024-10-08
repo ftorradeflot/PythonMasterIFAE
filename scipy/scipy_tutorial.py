@@ -7,7 +7,7 @@
 #       extension: .py
 #       format_name: light
 #       format_version: '1.5'
-#       jupytext_version: 1.14.7
+#       jupytext_version: 1.16.4
 #   kernelspec:
 #     display_name: Python 3 (ipykernel)
 #     language: python
@@ -30,6 +30,7 @@
 # # Notebook Setup (run me first!)
 
 # +
+import os
 from pathlib import Path
 
 import scipy as sp
@@ -44,6 +45,11 @@ plt.rcParams['figure.figsize'] = (12, 8)
 plt.rcParams['font.size'] = 16
 plt.rcParams['lines.linewidth'] = 2
 # -
+
+# if you cd'd to the repo folder before launching the jupyter lab server this should be fine
+path_to_the_repo = os.getcwd() 
+# Otherwise you'll have to set it manually
+#path_to_the_repo = "/whatever/path/you/cloned/the/repo/to"
 
 # # Physical constants
 
@@ -60,8 +66,6 @@ for k, v in const.physical_constants.items():
     i += 1
     if i >= 20:
         break
-
-
 
 # +
 val, unit, uncertainty = const.physical_constants['muon mass energy equivalent in MeV']
@@ -212,7 +216,9 @@ print('\tb = {:5.2f}'.format(intercept))
 # y = a \sin(x-b) + c
 # $$
 
-
+# +
+# #%load -r 41-54 {path_to_the_repo}/scipy/scipy_solutions.py
+# -
 
 # <a id=uncertainties_guesses></a>
 # ### Providing uncertainties and initial guesses
@@ -430,9 +436,9 @@ print('Fit: λ = {:.2f} ± {:.2f}'.format(result.x[0], np.sqrt(result.hess_inv[0
 #
 # You can make use of the `norm.rvs` and `norm.pdf` functions to generate the sample and define the function to be minimized.
 
-from scipy.stats import norm
-
-
+# +
+# #%load -r 82-109 {path_to_the_repo}/scipy/scipy_solutions.py
+# -
 
 # # Fast Fourier Transforms (`fft` and `fftpack` )
 
@@ -493,64 +499,59 @@ quad(f, 0, 5)
 #
 # For 2D, 3D, or n-dimensional integrals , use `dblquad`, `tplquad`, or `nquad`, respectively.
 
-# For some more interesting functions, Scipy's other function integration routines might be helpful:
+# Scipy includes other function integration routines that might be helpful for special cases:
 # * `quadrature` : [Gaussian quadrature](https://en.wikipedia.org/wiki/Gaussian_quadrature)
 # * `romberg` : [Romberg integration](https://en.wikipedia.org/wiki/Romberg%27s_method)
-#
-# For example, consider the $\mathrm{sinc}$ function:
-#
-# $$
-# \mathrm{sinc}(x) \equiv
-# \begin{cases} 
-# 1 & x = 0 \\
-# \sin(x)/x & \mathrm{otherwise}
-# \end{cases}
-# $$
-
-# +
-x = np.linspace(-10, 10, 1000)
-y = np.sinc(x)
-plt.plot(x, y)
-plt.title('Sinc Function')
-
-res = quad(np.sinc, -10, 10)
-
-plt.text(-10, 0.8, r'$ \int_{{-10}}^{{10}} \mathrm{{sinc}}(x) \ dx = {result:.4f}$ ?'.format(result=res[0]));
-# -
-
-# `quad` used to struggle with `sinc` but it has been improved and it is no longer the case. Now it provides an accurate result.
 
 # <a id=sampleintegration></a>
 # ## Sample integration
 
-# If you have a collection of points that you want to integrate, you could use an [interpolation function](#interpolation) and pass it to `quad`. A better alternative is to use the purpose-built functions `trapz`, `romb`, and `simps`.
+# If you have a collection of points that you want to integrate, you could use an [interpolation function](#interpolation) and pass it to `quad`. A better alternative is to use the purpose-built functions `trapezoid`, `romb`, and `simpson`.
 
-# We will consider the $\mathrm{sinc}$ function again as an example. The most naive (and surprisingly robust) integration method is using the trapazoid rule, which is implemented in `trapz`:
+# We will consider the $\mathrm{sinc}$ function as an example.
+#
+# $$
+# \mathrm{sinc}(x) \equiv
+# \begin{cases}
+#     1 & x = 0 \\
+#     \sin(x)/x & \mathrm{otherwise}
+# \end{cases}
+# $$
+#
+# The most naive (and surprisingly robust) integration method is using the trapazoid rule, which is implemented in `trapezoid`:
+
+x = np.linspace(-10, 10, 1000)
+plt.plot(x, np.sinc(x));
+plt.text(-10, 0.8, r'$ \int_{-10}^{10} \mathrm{sinc}(x) \ dx$ = ?')
 
 # +
-from scipy.integrate import trapz
+from scipy.integrate import trapezoid
 
 # 50 grid points
 x1 = np.linspace(-10, 10, 51)
 y1 = np.sinc(x1)
-print('  50 points:', trapz(y1, x1))   # note the order of the arguments: y, x
+print('  50 points:', trapezoid(y1, x1))   # note the order of the arguments: y, x
 
 # 1000 grid points
 x = np.linspace(-10, 10, 10000)
 y = np.sinc(x)
-print('1000 points:', trapz(y, x))
+print('1000 points:', trapezoid(y, x))
 # -
 
 # <a id=exercise_3></a>
 # ### Exercise 3
 #
-# Apply the `trapz` function to calculate:
+# Apply the `trapezoid` function to calculate:
 #
 # $$
 # \int_{-4}^{4} \sqrt[3]{(1 - x^3)} dx
 # $$
 #
 # **Hint** use the `np.cbrt` function
+
+# +
+# #%load -r 123-133 {path_to_the_repo}/scipy/scipy_solutions.py
+# -
 
 # ## Ordinary differential equations (ODE)
 #
@@ -561,7 +562,7 @@ print('1000 points:', trapz(y, x))
 # Rewritten as a system of 1st order equations and treating x, y coordinates independently
 #
 # $$
-# x_0' = v_0 \\ 
+# x_0' = v_0 \\
 # x_1' = v_1 \\
 # v_0' = 0 \\
 # v_1' = -g
@@ -573,6 +574,8 @@ print('1000 points:', trapz(y, x))
 # \vec{v} = \vec{a}t + \vec{v_0} \\
 # \vec{x} = \frac{1}{2}\vec{a}t^2 + \vec{v_0}t + \vec{x_0}
 # $$
+#
+# You can use the `solve_ivp` function that relies on typical ODE resolution methods like Runge-Kutta.
 
 from scipy.integrate import solve_ivp
 from numpy import concatenate as  npc
@@ -621,16 +624,17 @@ v_fac = 1
 s = ode_solution.y
 t = ode_solution.t
 
-ax.plot(s[0, :], s[1, :], marker='o')
+ax.plot(s[0, :], s[1, :], marker='o', label='solve_ivp')
 
 for x, y, vx, vy in s.T:
     ax.arrow(x, y, v_fac*vx, v_fac*vy, width=0.01, head_width=3)
 
 # plot vs analytical solution
 a_s = np.vstack([motion_wo_drag(tt, y0) for tt in np.linspace(*time_frame, 100)]).T
-ax.plot(a_s[0, :], a_s[1, :])
+ax.plot(a_s[0, :], a_s[1, :], label='analytical solution')
 
 ax.axis('equal');
+ax.legend();
 # -
 
 # # Interpolation
@@ -727,6 +731,10 @@ plt.grid(linestyle='--');
 # * linear interpolation and cubic splines
 # * on the [-10, 10] interval
 
+# +
+# #%load -r 144-178 {path_to_the_repo}/scipy/scipy_solutions.py
+# -
+
 # <a id=stats></a>
 # # Stats
 #
@@ -767,13 +775,13 @@ x = np.linspace(-3, 3, 100)
 plt.plot(x, std_normal.pdf(x))
 plt.title('Standard Normal - Probability Density Function')
 plt.xlabel('x')
-plt.ylabel(r'$ f(x) =  \frac{1}{\sqrt{2 \pi}} \mathrm{e}^{-\frac{1}{2} x^2}}$');
+plt.ylabel(r'$ f(x) =  \frac{1}{\sqrt{2 \pi}} \mathrm{e}^{-\frac{1}{2} x^2} $');
 # -
 
 plt.plot(x, std_normal.cdf(x))
 plt.title('Standard Normal - Cumulative Distribution Function')
 plt.xlabel('x')
-plt.ylabel(r'$ F(x) =  \frac{1}{\sqrt{2 \pi}} \int_{-\infty}^{x}\mathrm{e}^{-\frac{1}{2} x^2}}$');
+plt.ylabel(r'$ F(x) =  \frac{1}{\sqrt{2 \pi}} \int_{-\infty}^{x}\mathrm{e}^{-\frac{1}{2} x^2}$');
 
 x_sample = std_normal.rvs(1000)
 hist_result = plt.hist(x_sample, range=[-3, 3], bins=100, density=True)
@@ -919,16 +927,22 @@ plt.hist(x_sample, bins=50, label='Sample data', density=True);
 plt.plot(x, stats.norm().pdf(x), label='N(0,1) pdf')
 plt.legend()
 
-
 # Normality test using `normaltest`: Tests if a sample comes from a normal distribution
 
+# +
+from IPython.display import display, Math
+
 def print_result(p, alpha):
-    print("p = {:g}".format(p))
+    
     if p < alpha:  # null hypothesis: x comes from a normal distribution
+        display(Math(r"p={:g} \lt \alpha={:g}".format(p, alpha)))
         print("The null hypothesis can be rejected")
     else:
-        print("The null hypothesis cannot be rejected")  
+        display(Math(r"p={:g} \ge \alpha={:g}".format(p, alpha)))
+        print("The null hypothesis cannot be rejected") 
 
+
+# -
 
 k2, p = stats.normaltest(x_sample)
 print_result(p, 5e-2)
@@ -973,7 +987,8 @@ print_result(p, alpha)
 import pandas as pd
 
 alpha = 1e-2
-df_prices = pd.read_csv('resources/stock.csv')
+stock_csv = os.path.join(path_to_the_repo, 'scipy', 'resources', 'stock.csv')
+df_prices = pd.read_csv(stock_csv)
 df_prices.head(10)
 # -
 
@@ -1014,6 +1029,16 @@ print_result(app_p, alpha)
 # * Create the instance of the Normal distribution
 # * Test if the sample comes from this normal distribution
 
+# +
+# #%load -r 186-189 {path_to_the_repo}/scipy/scipy_solutions.py
+# -
+
+# # %load -r 186-189 /home/torradeflot/Projects/PythonMasterIFAE/scipy/scipy_solutions.py
+p_mic = stats.norm.fit(df_incs.Microsoft)
+mic_dist = stats.norm(*p_mic)
+mic_K, mic_p = stats.kstest(df_incs['Microsoft'], mic_dist.cdf)
+print_result(mic_p, alpha)
+
 # Once you have done this. Here comes the tougher part:
 #
 # Imagine you are a product designer in a finantial company. You want to create a new investment product to be "sold" to your clients based on the future stock prices of some IT companies. The profit the client gets from his investement is calculated like this:
@@ -1022,7 +1047,9 @@ print_result(app_p, alpha)
 #
 # **What is the expected profit of this product?**
 
-
+# +
+# #%load -r 196-232 {path_to_the_repo}/scipy/scipy_solutions.py
+# -
 
 # <a id=spatial_functions></a>
 # # Spatial Functions
@@ -1060,7 +1087,7 @@ convex_hull_plot_2d(hull);
 #
 # kd-tree for quick nearest-neighbor lookup
 
-points_file = Path('resources') / 'oss_2022g_mod.csv'
+points_file = Path(path_to_the_repo) / 'scipy' / 'resources' / 'oss_2022g_mod.csv'
 df = pd.read_csv(points_file)
 df = df[(df.obs_type == 'WS') & ( df.dither_id == 0 )]
 
@@ -1072,7 +1099,7 @@ from scipy.spatial import KDTree
 tree = KDTree(df[['RA', 'Dec']])
 
 new_points = np.array([[50, -60],[61, -61], [50, -50]]) 
-dists, inds = tree1.query(new_points, k=1)
+dists, inds = tree.query(new_points, k=1)
 
 # +
 fig, ax = plt.subplots()

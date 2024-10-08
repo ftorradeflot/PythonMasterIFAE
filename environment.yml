@@ -24,4 +24,6 @@ dependencies:
   - scipy=1.13.1
   - seaborn=0.13.2
   - sqlalchemy=2.0.30
+  - pip:
+    - jupyterlab-mathjax2
 
